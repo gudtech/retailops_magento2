@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
+    <system>
+        <section id="retailops" translate="label" type="text" sortOrder="110" showInDefault="1"
+                 showInWebsite="1" showInStore="1">
+            <label>Retail Ops</label>
+            <tab>service</tab>
+            <resource>Shiekhdev_All::config_modules</resource>
+            <group id="Shiekhdev_RetailOps" type="text" translate="label" sortOrder="1" showInDefault="1"
+                   showInWebsite="1" showInStore="1">
+                <label>General</label>
+                <field id="turn_on" type="select" showInDefault="1" showInStore="1" sortOrder="10" translate="label" showInWebsite="1">
+                    <label>Enabled</label>
+                    <source_model>Magento\Config\Model\Config\Source\Enabledisable</source_model>
+                </field>
+                <field id="password" type="text" translate="label" showInDefault="1" showInStore="1" sortOrder="20">
+                    <label>Set retail ops integraion key</label>
+                </field>
+            </group>
+        </section>
+    </system>
+</config>
