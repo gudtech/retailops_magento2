@@ -173,7 +173,7 @@ class Order
         $payment = $order->getPayment();
         $paymentR['payment_processing_type'] = self::$paymentProcessingType['default'];
         $paymentR['payment_type'] = $payment->getMethod();
-        $paymentR['amount'] = $payment->getBaseAmountPaid();
+        $paymentR['amount'] = (float)$payment->getBaseAmountPaid();
         return $this->getGiftPaymentTransaction([$paymentR], $order);
 
     }
