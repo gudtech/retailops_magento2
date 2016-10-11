@@ -1,0 +1,14 @@
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">
+    <event name="retailops_before_pull_order_cancel">
+        <observer name="retail_ops_api_logger" instance="\RetailOps\Api\Observers\Logger" />
+    </event>
+    <event name="retailops_before_pull_order_acknowledge">
+        <observer name="_retail_ops_api_logger" instance="\RetailOps\Api\Observers\Logger" />
+    </event>
+    <event name="retailops_before_pull_order">
+        <observer name="_retail_ops_api_logger" instance="\RetailOps\Api\Observers\Logger" />
+    </event>
+    <event name="retailops_before_pull_order_complete">
+        <observer name="_retail_ops_api_logger" instance="\RetailOps\Api\Observers\Logger" />
+    </event>
+</config>
