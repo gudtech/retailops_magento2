@@ -19,7 +19,9 @@ class Router implements \Magento\Framework\App\RouterInterface
             'inventory_push_v1' => 'Inventory',
             'order_pull_v1' => 'Order\\Pull',
             'order_acknowledge_v1' => 'Order\Acknowledge',
-            'order_cancel_v1' => 'Order\Cancel'
+            'order_cancel_v1' => 'Order\Cancel',
+            'order_complete_v1' => 'Order\Complete'
+
         ];
     /**
      * @var \Magento\Framework\App\ActionFactory

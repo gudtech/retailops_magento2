@@ -8,8 +8,7 @@
     <event name="retailops_before_pull_order">
         <observer name="Shiekhdev_retail_ops_logger" instance="\Shiekhdev\RetailOps\Observers\Logger" />
     </event>
-    <event name="retailops_before_pull_order_update">
+    <event name="retailops_before_pull_order_complete">
         <observer name="Shiekhdev_retail_ops_logger" instance="\Shiekhdev\RetailOps\Observers\Logger" />
     </event>
-
 </config>

@@ -65,7 +65,7 @@ class UpgradeSchema implements UpgradeSchemaInterface
         if (version_compare($context->getVersion(),'0.0.4') < 0 ) {
             $this->createOrderHistory($setup);
         }
-        if (version_compare($context->getVersion(), '0.0.5') < 0 ) {
+        if (version_compare($context->getVersion(), '0.1.0') < 0 ) {
             $this->createLoggerTable($setup);
         }
         $setup->endSetup();
@@ -73,6 +73,9 @@ class UpgradeSchema implements UpgradeSchemaInterface
 
     protected function createLoggerTable($installer)
     {
+        if ( $installer->getConnection()->isTableExists($installer->getTable('retailops/order_status_history'))) {
+            $installer->getConnection()->dropTable($installer->getTable('retailops/order_status_history'));
+        }
         $table = $installer->getConnection()
              ->newTable($installer->getTable('retailops/order_status_history'))
              ->addColumn(
@@ -95,6 +98,35 @@ class UpgradeSchema implements UpgradeSchemaInterface
                 '64k',
                 [],
                 'Logger response'
+
+            )
+            ->addColumn(
+                'status',
+                \Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
+                '255',
+                [],
+                'Status'
+            )
+            ->addColumn(
+                'error',
+                \Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
+                '8k',
+                [],
+                'Log exception, if exists'
+            )
+            ->addColumn(
+                'url',
+                \Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
+                '255',
+                [],
+                'Url request'
+            )
+            ->addColumn(
+                'create_date',
+                \Magento\Framework\DB\Ddl\Table::TYPE_TIMESTAMP,
+                null,
+                [],
+                'Date create time'
             );
         $installer->getConnection()->createTable($table);
 

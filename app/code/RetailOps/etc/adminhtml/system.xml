@@ -17,7 +17,12 @@
                 <field id="password" type="text" translate="label" showInDefault="1" showInStore="1" sortOrder="20">
                     <label>Set retail ops integraion key</label>
                 </field>
-            </group>
+                <field id="statuses_inventory" translate="label" type="multiselect" sortOrder="2" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label> Status inventory which will be calculate for retail</label>
+                    <source_model>\Shiekhdev\RetailOps\Config\InventoryType</source_model>
+                    <can_be_empty>0</can_be_empty>
+                </field>
+                </group>
         </section>
     </system>
 </config>

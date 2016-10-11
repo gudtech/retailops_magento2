@@ -15,6 +15,11 @@ class Acknowledge  extends RetailOps
 {
     const SERVICENAME = 'order_acknowledge';
     /**
+     * @var string
+     */
+    protected $areaName = self::BEFOREPULL.self::SERVICENAME;
+
+    /**
      * @var \Shiekhdev\RetailOps\Model\Acknowledge
      */
     protected $orderFactory;
@@ -41,20 +46,16 @@ class Acknowledge  extends RetailOps
             $postData = $this->getRequest()->getPost();
             $orderFactrory = $this->orderFactory->create();
             $response = $orderFactrory->setOrderRefs($postData);
-            $serviceName = self::SERVICENAME;
-            $areaName = "retailops_before_pull_{$serviceName}";
-            $this->_eventManager->dispatch($areaName, [
-                'response' => $response,
-                'request' => $this->getRequest(),
-            ]);
             $this->response = $response;
         }catch(\Exception $e){
             $this->logger->addCritical($e->getMessage());
             $this->response = (object)null;
             $this->status = 500;
+            $this->error = $e;
         }finally{
             $this->getResponse()->representJson(json_encode($this->response));
             $this->getResponse()->setStatusCode($this->status);
+            parent::execute();
         }
     }
 

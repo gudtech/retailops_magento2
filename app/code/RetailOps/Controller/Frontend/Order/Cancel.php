@@ -16,33 +16,25 @@ class Cancel extends RetailOps
 {
     const SERVICENAME = 'order_cancel';
     /**
-     * @var array|null
+     * @var string
      */
-    protected $response;
-
-    protected $status = 200;
-
-
+    protected $areaName = self::BEFOREPULL.self::SERVICENAME;
     public function execute()
     {
         try{
             $postData = $this->getRequest()->getPost();
             $orderFactrory = $this->orderFactory->create();
             $response = $orderFactrory->cancelOrder($postData);
-            $serviceName = self::SERVICENAME;
-            $areaName = "retailops_before_pull_{$serviceName}";
-            $this->_eventManager->dispatch($areaName, [
-                'response' => $response,
-                'request' => $this->getRequest(),
-            ]);
             $this->response = $response;
         }catch(\Exception $e){
             $this->logger->addCritical($e->getMessage());
             $this->response = (object)null;
             $this->status = 500;
+            $this->error = $e;
         }finally{
             $this->getResponse()->representJson(json_encode($this->response));
             $this->getResponse()->setStatusCode($this->status);
+            parent::execute();
         }
     }
 

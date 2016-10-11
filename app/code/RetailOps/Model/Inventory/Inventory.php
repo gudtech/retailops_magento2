@@ -15,6 +15,9 @@ use Magento\Framework\Indexer\CacheContext;
 class Inventory
 {
     const FROM = 'retailops';
+    const INVENTORY_TYPE = 'retailops/Shiekhdev_RetailOps/statuses_inventory';
+    const SKU = 'sku';
+    const QUANTITY = 'quantity_available';
     /**
      * @param $inventory []
      */
@@ -128,7 +131,8 @@ class Inventory
                                 \Shiekhdev\RICSApi\Model\InventoryHistory $ShiekhdevInventoryHistory,
                                 \Magento\Framework\ObjectManagerInterface $objectManager,
                                 \Magento\Framework\Event\ManagerInterface $eventManager,
-                                \Magento\Catalog\Model\ProductFactory $productFactory)
+                                \Magento\Catalog\Model\ProductFactory $productFactory,
+                                \Magento\Framework\View\Element\Context $context)
     {
         $this->logger = $logger;
         $this->_productCollectionFactory = $productCollectionFactory;
@@ -140,10 +144,53 @@ class Inventory
         $this->_objectManager = $objectManager;
         $this->_eventManager = $eventManager;
         $this->_productFactory = $productFactory;
+        $this->_scopeConfig = $context->getScopeConfig();
     }
 
     protected function getCacheContext()
     {
         return \Magento\Framework\App\ObjectManager::getInstance()->create(CacheContext::class);
+    }
+
+    /**
+     * @param array $inventories
+     * @return array
+     */
+    public function calculateInventory(array $inventories)
+    {
+        $inventoryTypes =  $this->_scopeConfig->getValue(self::INVENTORY_TYPE);
+        if( $inventoryTypes === null ) {
+            return $this->setDefaultInventories($inventories);
+        }
+        $inventoryTypes = explode(',', $inventoryTypes);
+        foreach ($inventories as &$inventory)
+        {
+            $quantityDetail = $inventory['quantity_detail'];
+            $count = 0;
+            foreach ($quantityDetail as $quantity) {
+                if ( in_array($quantity['quantity_type'], $inventoryTypes)
+                    || (in_array('empty', $inventoryTypes) && $quantity['quantity_type'] == '')) {
+                    $count += (float)$quantity['total_quantity'];
+                }
+
+            }
+            $inventory['calc_inventory'] = $count;
+        }
+
+        return $inventories;
+    }
+
+    /**
+     * @param array $inventories
+     * @return array
+     */
+    public function setDefaultInventories($inventories)
+    {
+        foreach ($inventories as &$inventory)
+        {
+            $inventory['calc_inventory'] = $inventory[self::QUANTITY];
+        }
+
+        return $inventories;
     }
 }

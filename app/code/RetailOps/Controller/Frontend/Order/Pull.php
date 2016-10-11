@@ -16,6 +16,10 @@ class Pull  extends RetailOps
     const SERVICENAME = 'order';
     const COUNT_ORDERS_PER_REQUEST = 50;
     /**
+     * @var string
+     */
+    protected $areaName = self::BEFOREPULL.self::SERVICENAME;
+    /**
      * @var \Shiekhdev\RetailOps\Model\Pull\OrderFactory
      */
     protected $orderFactory;
@@ -42,21 +46,16 @@ class Pull  extends RetailOps
             $pageToken = $this->getRequest()->getParam('page_token');
             $postData = $this->getRequest()->getPost();
             $response = $orderFactory->getOrders($pageToken, self::COUNT_ORDERS_PER_REQUEST, $postData);
-            $serviceName = self::SERVICENAME;
-            $areaName = "retailops_before_pull_{$serviceName}";
-            $this->_eventManager->dispatch($areaName, [
-                'orders' => $response,
-                'request' => $this->getRequest(),
-                'response' =>$response
-            ]);
             $this->response = $response;
         }catch(\Exception $e){
             $this->logger->addCritical($e->getMessage());
             $this->response = [];
             $this->status = 500;
+            $this->error = $e;
         }finally{
             $this->getResponse()->representJson(json_encode($this->response));
             $this->getResponse()->setStatusCode($this->status);
+            parent::execute();
         }
     }
 
