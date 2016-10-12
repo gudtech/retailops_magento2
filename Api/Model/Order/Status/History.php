@@ -6,7 +6,7 @@
  * Time: 17.17
  */
 
-namespace RetailOps\Model\Order\Status;
+namespace RetailOps\Api\Model\Order\Status;
 
 
 class History extends \Magento\Framework\Model\AbstractModel
