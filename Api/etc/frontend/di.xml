@@ -4,7 +4,7 @@
     <type name="\RetailOps\Api\Controller\RetailOps">
         <plugin name="authorize" type="\RetailOps\Api\Plugin\Authorized" />
     </type>
-    <type name="\RetailOps\Logger\Base">
+    <type name="\RetailOps\Api\Logger\Base">
         <arguments>
             <argument name="filesystem" xsi:type="object">Magento\Framework\Filesystem\Driver\File</argument>
         </arguments>
@@ -13,7 +13,7 @@
         <arguments>
             <argument name="name" xsi:type="string">retailLogger</argument>
             <argument name="handlers"  xsi:type="array">
-                <item name="system" xsi:type="object">\RetailOps\Logger\Base</item>
+                <item name="system" xsi:type="object">\RetailOps\Api\Logger\Base</item>
             </argument>
         </arguments>
     </type>

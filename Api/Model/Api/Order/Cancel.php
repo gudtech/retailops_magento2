@@ -1,7 +1,7 @@
 <?php
 
 
-namespace \RetailOps\Api\Model\Api\Order;
+namespace RetailOps\Api\Model\Api\Order;
 
 
 class Cancel

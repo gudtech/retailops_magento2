@@ -6,7 +6,7 @@
  * Time: 11.56
  */
 
-namespace \RetailOps\Api\Model\Order;
+namespace RetailOps\Api\Model\Order;
 
 
 class Complete

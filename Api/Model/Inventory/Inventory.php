@@ -6,7 +6,7 @@
  * Time: 17.59
  */
 
-namespace \RetailOps\Api\Model\Inventory;
+namespace RetailOps\Api\Model\Inventory;
 
 use Psr\Log\LoggerInterface;
 use Magento\Framework\Indexer\CacheContext;
@@ -18,6 +18,69 @@ class Inventory
     const INVENTORY_TYPE = 'retailops/_RetailOps/statuses_inventory';
     const SKU = 'sku';
     const QUANTITY = 'quantity_available';
+
+    /**
+     * @var \RetailOps\Api\Api\InventoryHistoryInterface
+     */
+    protected $_inventoryHistoryRepository;
+
+    /**
+     * @var LoggerInterface|\RetailOps\Api\Logger\Logger
+     */
+    protected $logger;
+
+    /**
+     * @var \Magento\Catalog\Model\ResourceModel\Product\CollectionFactory|\RetailOps\Api\Model\Product\CollectionFactory
+     */
+    protected $_productCollectionFactory;
+
+    /**
+     * @var \Magento\CatalogInventory\Api\StockRegistryInterface
+     */
+    protected $_stock;
+
+    /**
+     * @var \Magento\CatalogInventory\Model\ResourceModel\Stock
+     */
+    protected $_stockRegistry;
+
+    /**
+     * @var \Magento\Store\Model\StoreManager|\Magento\Store\Model\StoreManagerInterface
+     */
+    protected $_store;
+
+    /**
+     * @var \Magento\CatalogInventory\Model\Stock\StockItemRepository
+     */
+    protected $_stockItem;
+
+    /**
+     * @var \RetailOps\Api\Api\Data\InventoryHistoryInterfaceFactory_InventoryHistory
+     */
+    protected $_InventoryHistoryFactory;
+
+    /**
+     * @var \Magento\Framework\ObjectManagerInterface
+     */
+    protected $_objectManager;
+
+    /**
+     * @var \Magento\Framework\Event\ManagerInterface
+     */
+    protected $_eventManager;
+
+    /**
+     * @var \Magento\Catalog\Model\ProductFactory
+     */
+    protected $_productFactory;
+
+    /**
+     * @var \Magento\Framework\App\Config\ScopeConfigInterface
+     */
+    protected $_scopeConfig;
+
+
+
     /**
      * @param $inventory []
      */
@@ -40,22 +103,18 @@ class Inventory
         $productsForRefreshCache = [];
         foreach ($collection as $item) {
             $stock = $this->_stock->getStockItem($item->getId(), (int)$websiteId);
-//            $stock->setWebSiteId($websiteId);
-//            $stock->setQty($productsRetailOps[$product->getData('upc')]);
-//            $this->_stockItem->save($stock);
-
             $qty = $stock->getQty();
             $stock_id = $stock->getStockId();
 
-            $this->_InventoryHistory = $this->_objectManager->create('\RICSApi\Model\InventoryHistory');
+            $inventoryHistory = $this->_InventoryHistoryFactory->create();
 
-            $this->_InventoryHistory->setProductId($item->getId());
-            $this->_InventoryHistory->setInventoryArrived($productsRetailOps[$item->getData('sku')]);
+            $inventoryHistory->setProductId($item->getId());
+            $inventoryHistory->setInventoryArrived($productsRetailOps[$item->getData('sku')]);
 
-            $this->_InventoryHistory->setInventoryInShop($qty);
-            $this->_InventoryHistory->setWebsiteId($websiteId);
-            $this->_InventoryHistory->setStockId($stock_id);
-            $this->_InventoryHistory->setFrom(self::FROM);
+            $inventoryHistory->setInventoryInShop($qty);
+            $inventoryHistory->setWebsiteId($websiteId);
+            $inventoryHistory->setStockId($stock_id);
+            $inventoryHistory->setFrom(self::FROM);
             if ($qty == 0 and $productsRetailOps[$item->getData('sku')] > 0) {
                 $productsForRefreshCache[$item->getId()] = ['stock' => $stock, 'inventory' => $productsRetailOps[$item->getData('sku')]];
             }
@@ -63,23 +122,22 @@ class Inventory
             if ($qty > 0 and $productsRetailOps[$item->getData('sku')] <= 0) {
                 $productsForRefreshCache[$item->getId()] = ['stock' => $stock, 'inventory' => $productsRetailOps[$item->getData('sku')]];
             }
-//
             if ($qty > $productsRetailOps[$item->getData('sku')]) {
                 $count = $qty - $productsRetailOps[$item->getData('sku')];
                 $itemsLower[$item->getId()] = $count;
-                $this->_InventoryHistory->setOperator('-');
-                $this->_InventoryHistory->setInventoryAdd($count);
+                $inventoryHistory->setOperator('-');
+                $inventoryHistory->setInventoryAdd($count);
                 $this->logger->debug('productId-:' . $item->getId(), [$itemsLower[$item->getSku()]]);
             }
             if ($qty < $productsRetailOps[$item->getData('sku')]) {
                 $count = $productsRetailOps[$item->getData('sku')] - $qty;
                 $itemsUpper[$item->getId()] = $count;
-                $this->_InventoryHistory->setOperator('+');
-                $this->_InventoryHistory->setInventoryAdd($count);
+                $inventoryHistory->setOperator('+');
+                $inventoryHistory->setInventoryAdd($count);
                 $this->logger->debug('productId+:' . $item->getId(), [$itemsUpper[$item->getId()]]);
             }
 
-            $this->_InventoryHistory->save();
+            $this->_inventoryHistoryRepository->save($inventoryHistory);
         }
 
         $this->refreshChangeStockProducts($productsForRefreshCache);
@@ -128,7 +186,8 @@ class Inventory
                                 \Magento\CatalogInventory\Model\ResourceModel\Stock $stockRepositories,
                                 \Magento\Store\Model\StoreManager $store,
                                 \Magento\CatalogInventory\Model\Stock\StockItemRepository $stockItem,
-                                \RICSApi\Model\InventoryHistory $InventoryHistory,
+                                \RetailOps\Api\Api\Data\InventoryHistoryInterfaceFactory $InventoryHistory,
+                                \RetailOps\Api\Api\InventoryHistoryInterface $inventoryHistoryRepository,
                                 \Magento\Framework\ObjectManagerInterface $objectManager,
                                 \Magento\Framework\Event\ManagerInterface $eventManager,
                                 \Magento\Catalog\Model\ProductFactory $productFactory,
@@ -140,11 +199,12 @@ class Inventory
         $this->_stockRegistry = $stockRepositories;
         $this->_store = $store;
         $this->_stockItem = $stockItem;
-        $this->_InventoryHistory = $InventoryHistory;
+        $this->_InventoryHistoryFactory = $InventoryHistory;
         $this->_objectManager = $objectManager;
         $this->_eventManager = $eventManager;
         $this->_productFactory = $productFactory;
         $this->_scopeConfig = $context->getScopeConfig();
+        $this->_inventoryHistoryRepository = $inventoryHistoryRepository;
     }
 
     protected function getCacheContext()

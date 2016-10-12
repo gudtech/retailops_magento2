@@ -6,7 +6,7 @@
  * Time: 12.36
  */
 
-namespace \RetailOps\Api\Model\Api\Traits;
+namespace RetailOps\Api\Model\Api\Traits;
 
 
 trait Filter

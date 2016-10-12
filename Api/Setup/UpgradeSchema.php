@@ -6,7 +6,7 @@
  * Time: 16.06
  */
 
-namespace \RetailOps\Api\Setup;
+namespace RetailOps\Api\Setup;
 
 use Magento\Framework\Setup\UpgradeSchemaInterface;
 use Magento\Framework\Setup\ModuleContextInterface;

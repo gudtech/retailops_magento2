@@ -6,7 +6,7 @@
  * Time: 11.59
  */
 
-namespace \RetailOps\Api\Model\Api\Order;
+namespace RetailOps\Api\Model\Api\Order;
 
 
 class Update

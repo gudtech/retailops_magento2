@@ -1,5 +1,5 @@
 <?php
-namespace \RetailOps\Api\Model\Pull;
+namespace RetailOps\Api\Model\Pull;
 
 use Magento\Framework\Exception\AuthenticationException;
 use \Magento\Framework\ObjectManagerInterface;

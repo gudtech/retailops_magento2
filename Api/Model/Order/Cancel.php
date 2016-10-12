@@ -6,13 +6,13 @@
  * Time: 12.12
  */
 
-namespace \RetailOps\Api\Model\Order;
+namespace RetailOps\Api\Model\Order;
 
 
 class Cancel
 {
     /**
-     * @var \RetailOps\Api\Model\Api\Order\Cancel
+     * @var RetailOps\Api\Model\Api\Order\Cancel
      */
     protected $cancelOrder;
 

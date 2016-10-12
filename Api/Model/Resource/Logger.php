@@ -6,7 +6,7 @@
  * Time: 13.01
  */
 
-namespace \RetailOps\Api\Model\Resource;
+namespace RetailOps\Api\Model\Resource;
 
 
 class Logger extends \Magento\Framework\Model\ResourceModel\Db\AbstractDb

@@ -3,12 +3,15 @@
         <observer name="retail_ops_api_logger" instance="\RetailOps\Api\Observers\Logger" />
     </event>
     <event name="retailops_before_pull_order_acknowledge">
-        <observer name="_retail_ops_api_logger" instance="\RetailOps\Api\Observers\Logger" />
+        <observer name="retail_ops_api_logger" instance="\RetailOps\Api\Observers\Logger" />
     </event>
     <event name="retailops_before_pull_order">
-        <observer name="_retail_ops_api_logger" instance="\RetailOps\Api\Observers\Logger" />
+        <observer name="retail_ops_api_logger" instance="\RetailOps\Api\Observers\Logger" />
     </event>
     <event name="retailops_before_pull_order_complete">
-        <observer name="_retail_ops_api_logger" instance="\RetailOps\Api\Observers\Logger" />
+        <observer name="retail_ops_api_logger" instance="\RetailOps\Api\Observers\Logger" />
+    </event>
+    <event name="retailops_before_pull_inventory">
+        <observer name="retail_ops_api_logger" instance="\RetailOps\Api\Observers\Logger" />
     </event>
 </config>

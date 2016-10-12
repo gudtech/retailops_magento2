@@ -6,7 +6,7 @@
  * Time: 11.53
  */
 
-namespace RetailOps\Controller\Frontend\Order;
+namespace RetailOps\Api\Controller\Frontend\Order;
 
 use Magento\Framework\App\ObjectManager;
 use \RetailOps\Api\Controller\RetailOps;
@@ -26,13 +26,17 @@ class Complete extends RetailOps
      * @var string
      */
     protected $areaName = self::BEFOREPULL.self::SERVICENAME;
+
+    /**
+     * @return \Magento\Framework\App\ResponseInterface
+     */
     public function execute()
     {
 
         try {
             $postData = (array)$this->getRequest()->getPost();
             /**
-             * \\RetailOps\Model\Order\CompleteFactory
+             * @var \RetailOps\Api\Model\Order\Complete
              */
             $orderFactrory = $this->orderFactory->create();
             $response = $orderFactrory->updateOrder($postData);

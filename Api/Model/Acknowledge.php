@@ -6,7 +6,7 @@
  * Time: 14.11
  */
 
-namespace \RetailOps\Api\Model;
+namespace RetailOps\Api\Model;
 
 
 class Acknowledge

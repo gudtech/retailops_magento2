@@ -6,7 +6,7 @@
  * Time: 11.11
  */
 
-namespace \RetailOps\Api\CustomRouter;
+namespace RetailOps\Api\CustomRouter;
 
 
 
@@ -14,6 +14,7 @@ use Magento\Framework\App\ObjectManager;
 
 class Router implements \Magento\Framework\App\RouterInterface
 {
+    const MODULE_ENABLE = 'retailops/RetailOps/turn_on';
     protected static $map =
         [
             'inventory_push_v1' => 'Inventory',
@@ -55,8 +56,13 @@ class Router implements \Magento\Framework\App\RouterInterface
      */
     public function match(\Magento\Framework\App\RequestInterface $request)
     {
-        if(!$request->isPost())
+        $scopeConfig = \Magento\Framework\App\ObjectManager::getInstance()->get('\Magento\Framework\App\Config\ScopeConfigInterface');
+        if (!$scopeConfig->getValue(self::MODULE_ENABLE)) {
             return null;
+        }
+        if (!$request->isPost()) {
+            return null;
+        }
         $identifier = trim($request->getPathInfo(), '/');
         $path = explode('/', $identifier);
         if (count($path) !== 2)
@@ -72,7 +78,7 @@ class Router implements \Magento\Framework\App\RouterInterface
             //fix error with empty content
             $request->setPost($paremeters);
             return $this->actionFactory->create(
-                "\\RetailOps\\Controller\\Frontend\\{$controller}",
+                "\\RetailOps\\Api\\Controller\\Frontend\\{$controller}",
                 ['request' => $request]
             );
         }

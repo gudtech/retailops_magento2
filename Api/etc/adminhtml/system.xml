@@ -6,8 +6,8 @@
                  showInWebsite="1" showInStore="1">
             <label>Retail Ops</label>
             <tab>service</tab>
-            <resource>_All::config_modules</resource>
-            <group id="_RetailOps" type="text" translate="label" sortOrder="1" showInDefault="1"
+            <resource>RetailOps_Api::api</resource>
+            <group id="RetailOps" type="text" translate="label" sortOrder="1" showInDefault="1"
                    showInWebsite="1" showInStore="1">
                 <label>General</label>
                 <field id="turn_on" type="select" showInDefault="1" showInStore="1" sortOrder="10" translate="label" showInWebsite="1">
@@ -21,6 +21,11 @@
                     <label> Status inventory which will be calculate for retail</label>
                     <source_model>\RetailOps\Api\Config\InventoryType</source_model>
                     <can_be_empty>0</can_be_empty>
+                </field>
+                <field id="enable_log" type="select" showInDefault="1" showInStore="1" sortOrder="10" translate="label" showInWebsite="1">
+                    <label>Enabled</label>
+                    <source_model>Magento\Config\Model\Config\Source\Enabledisable</source_model>
+                    <comment><![CDATA[Default it try, but all response was send to db. After debug or for increase perfomance disable this]]></comment>
                 </field>
                 </group>
         </section>
