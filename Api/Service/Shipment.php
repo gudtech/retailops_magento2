@@ -13,7 +13,7 @@ abstract class Shipment implements \RetailOps\Api\Api\Shipment\ShipmentInterface
     /**
      * @var array|null
      */
-    protected $unShippmentItems;
+    protected $unShippmentItems = [];
 
     /**
      * @var \Magento\Shipping\Model\Config
@@ -33,12 +33,12 @@ abstract class Shipment implements \RetailOps\Api\Api\Shipment\ShipmentInterface
     /**
      * @var array|null
      */
-    protected $tracking;
+    protected $tracking = [];
 
     /**
      * @var array|null
      */
-    protected $shippmentItems;
+    protected $shippmentItems = [];
 
     /**
      * @var \Magento\Sales\Api\Data\OrderInterface
@@ -58,9 +58,8 @@ abstract class Shipment implements \RetailOps\Api\Api\Shipment\ShipmentInterface
         if($unShipments === null)
             return;
         foreach ($unShipments as $item) {
-            $unShipments[$item['channel_item_refnum']] = $item['unshipped_quantity'];
+            $this->unShippmentItems[$item['channel_item_refnum']] = $item['unshipped_quantity'];
         }
-        $this->unShippmentItems = $unShipments;
     }
 
     public function setTrackingAndShipmentItems(array $postData = [])
@@ -143,7 +142,7 @@ abstract class Shipment implements \RetailOps\Api\Api\Shipment\ShipmentInterface
 
     }
 
-    public function calcQuantity($itemId, $quantity)
+    private function calcQuantity($itemId, $quantity)
     {
         if (isset($this->unShippmentItems[$itemId])) {
             $unShipQuantity =  $this->unShippmentItems[$itemId];
@@ -152,11 +151,12 @@ abstract class Shipment implements \RetailOps\Api\Api\Shipment\ShipmentInterface
                 if ( $unShipQuantity === 0 ) {
                     unset($this->unShippmentItems[$itemId]);
 
+                }else{
+                    $this->unShippmentItems[$itemId] = $unShipQuantity;
                 }
                 $quantity = 0;
             } else {
                 $quantity = $quantity - $unShipQuantity;
-                $unShipQuantity = 0;
                 unset($this->unShippmentItems[$itemId]);
             }
         }

@@ -29,12 +29,6 @@ interface ShipmentInterface
      */
     public function setShipmentsItems(array $packageItems=[]);
 
-    /**
-     * @param $itemId
-     * @param $quantity
-     * @return float
-     */
-    public function calcQuantity($itemId, $quantity);
 
     /**
      * @param array $postData
