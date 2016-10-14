@@ -6,7 +6,7 @@
  * Time: 7.57
  */
 
-namespace \RetailOps\Api\Logger;
+namespace RetailOps\Api\Logger;
 
 
 class Base extends \Magento\Framework\Logger\Handler\Base

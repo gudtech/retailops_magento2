@@ -1,0 +1,11 @@
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <preference for="RetailOps\Api\Api\Data\InventoryHistorySearchInterface" type="Magento\Framework\Api\SearchResults" />
+    <preference for="RetailOps\Api\Api\Data\InventoryHistoryInterface" type="RetailOps\Api\Model\InventoryHistory" />
+    <preference for="RetailOps\Api\Api\InventoryHistoryInterface" type="RetailOps\Api\Model\InventoryHistoryRepository" />
+    <preference for="RetailOps\Api\Api\InventoryHistoryInterface" type="RetailOps\Api\Model\InventoryHistoryRepository" />
+    <type name="RetailOps\Api\Model\Api\Order\Complete">
+        <arguments>
+            <argument shared="false" name="shipment" xsi:type="object">\RetailOps\Api\Service\Shipment\Complete</argument>
+        </arguments>
+    </type>
+</config>

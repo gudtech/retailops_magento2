@@ -1,6 +1,6 @@
 <?php
 
-namespace Api\RetailOps\Controller\Frontend;
+namespace RetailOps\Api\Controller\Frontend;
 
 use Magento\Framework\App\ObjectManager;
 use RetailOps\Api\Controller\RetailOps;

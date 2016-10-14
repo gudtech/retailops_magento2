@@ -6,20 +6,33 @@
  * Time: 13.38
  */
 
-namespace \RetailOps\Api\Observers;
+namespace RetailOps\Api\Observers;
 
 
 use Magento\Framework\App\ObjectManager;
 
 class Logger implements \Magento\Framework\Event\ObserverInterface
 {
+    const LOG_STATUS = 'retailops/RetailOps/enable_log';
+
+    /**
+     * @var \RetailOps\Api\Model\LoggerFactory
+     */
     protected $loggerRetailOps;
+
+    /**
+     * @var \Magento\Framework\App\Config\ScopeConfigInterface
+     */
+    protected $scopeConfig;
     /**
      * @param Observer $observer
      * @return void
      */
     public function execute(\Magento\Framework\Event\Observer $observer)
     {
+        if (!$this->scopeConfig->getValue(self::LOG_STATUS)) {
+            return;
+        }
         $response = $observer->getResponse();
         $request = $observer->getRequest();
         if($request instanceof \Magento\Framework\App\Request\Http) {
@@ -41,8 +54,9 @@ class Logger implements \Magento\Framework\Event\ObserverInterface
         $loggerRetailOps->save();
     }
 
-    public function __construct(\RetailOps\Api\Model\LoggerFactory $loggerRetailOps)
+    public function __construct(\RetailOps\Api\Model\LoggerFactory $loggerRetailOps, \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig)
     {
         $this->loggerRetailOps = $loggerRetailOps;
+        $this->scopeConfig = $scopeConfig;
     }
 }

@@ -6,7 +6,7 @@
  * Time: 17.43
  */
 
-namespace \RetailOps\Api\Model;
+namespace RetailOps\Api\Model;
 
 
 class Inventory implements \RetailOps\Api\Api\InventoryInterface

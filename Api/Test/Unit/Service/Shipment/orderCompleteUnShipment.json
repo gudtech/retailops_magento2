@@ -1,0 +1,49 @@
+{
+  "integration_auth_token": "2KuxqV9rsAtAM78i47CITMvtnflUapNmgGJAvWiHqgUrk1xkeDNWlM3EsrmJEtmV",
+  "action": "order_complete",
+  "version": 1,
+  "client_id": 497,
+  "channel_info": {
+    "id": 21
+  },
+  "order": {
+    "channel_order_refnum": "string",
+    "retailops_order_id": 0,
+    "grand_total": 0,
+    "unshipped_items": [
+      {
+        "channel_item_refnum": 150,
+        "sku": "s12345",
+        "ordered_quantity": 0,
+        "unshipped_quantity": 1,
+        "effective_unit_price": 0,
+        "effective_extended_price": 0
+      }
+    ],
+    "shipments": [
+      {
+        "retailops_shipment_id": 0,
+        "packages": [
+          {
+            "retailops_package_id": 0,
+            "carrier_name": "UPS",
+            "carrier_class_name": "Ground",
+            "channel_ship_code": "string",
+            "tracking_number": "ZX29827782929",
+            "weight_kg": 0,
+            "date_shipped": "2016-04-08T21:13:11Z",
+            "package_items": [
+              {
+                "sku": "s12345",
+                "retailops_order_item_id": 0,
+                "retailops_shipment_item_id": 0,
+                "channel_item_refnum": 150,
+                "quantity": 2
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

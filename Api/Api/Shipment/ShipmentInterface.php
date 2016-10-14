@@ -9,7 +9,7 @@
 namespace RetailOps\Api\Api\Shipment;
 
 
-interface Shipment
+interface ShipmentInterface
 {
     /**
      * @param array $postData
@@ -21,7 +21,7 @@ interface Shipment
      * @param array $postData
      * @return void
      */
-    public function setTracking(array $postData=[]);
+    public function setTrackingAndShipmentItems(array $postData=[]);
 
     /**
      * @param array $packageItems
@@ -29,11 +29,11 @@ interface Shipment
      */
     public function setShipmentsItems(array $packageItems=[]);
 
+
     /**
-     * @param $itemId
-     * @param $quantity
-     * @return float
+     * @param array $postData
+     * @return void
      */
-    public function calcQuantity($itemId, $quantity);
+    public function registerShipment(array $postData=[]);
 
 }

@@ -6,7 +6,7 @@
  * Time: 7.56
  */
 
-namespace \RetailOps\Api\Logger;
+namespace RetailOps\Api\Logger;
 
 
 class Logger extends \Monolog\Logger

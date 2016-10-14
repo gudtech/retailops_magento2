@@ -1,0 +1,59 @@
+{
+  "integration_auth_token": "RETAILOPS_SDK",
+  "action": "order_complete",
+  "version": 1,
+  "client_id": 497,
+  "channel_info": {
+    "id": 21
+  },
+  "order": {
+    "channel_order_refnum": "11",
+    "retailops_order_id": 0,
+    "grand_total": 0,
+    "shipments": [
+      {
+        "retailops_shipment_id": 0,
+        "packages": [
+          {
+            "retailops_package_id": 0,
+            "carrier_name": "UPS",
+            "carrier_class_name": "Ground",
+            "channel_ship_code": "string",
+            "tracking_number": "ZX29827782929",
+            "weight_kg": 0,
+            "date_shipped": "2016-04-08T21:13:11Z",
+            "package_items": [
+              {
+                "sku": "string",
+                "retailops_order_item_id": 0,
+                "retailops_shipment_item_id": 0,
+                "channel_item_refnum": "63",
+                "quantity": 1
+              }
+
+            ]
+          },
+          {
+            "retailops_package_id": 0,
+            "carrier_name": "OPans",
+            "carrier_class_name": "Ground",
+            "channel_ship_code": "string",
+            "tracking_number": "ZX290827782929",
+            "weight_kg": 0,
+            "date_shipped": "2016-04-08T21:13:11Z",
+            "package_items": [
+              {
+                "sku": "string",
+                "retailops_order_item_id": 0,
+                "retailops_shipment_item_id": 0,
+                "channel_item_refnum": "62",
+                "quantity": 3
+              }
+
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

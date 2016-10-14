@@ -6,7 +6,7 @@
  * Time: 13.03
  */
 
-namespace \RetailOps\Api\Model\Resource\Collection\Logger;
+namespace RetailOps\Api\Model\Resource\Collection\Logger;
 
 
 class Collection extends \Magento\Framework\Model\ResourceModel\Db\Collection\AbstractCollection

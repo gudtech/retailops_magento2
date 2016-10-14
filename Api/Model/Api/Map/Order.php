@@ -6,7 +6,7 @@
  * Time: 15.14
  */
 
-namespace \RetailOps\Api\Model\Api\Map;
+namespace RetailOps\Api\Model\Api\Map;
 
 
 use Magento\Framework\App\ObjectManager;

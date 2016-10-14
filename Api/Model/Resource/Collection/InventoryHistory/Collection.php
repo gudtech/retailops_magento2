@@ -2,11 +2,11 @@
 /**
  * Created by PhpStorm.
  * User: galillei
- * Date: 23.9.16
- * Time: 17.26
+ * Date: 11.10.16
+ * Time: 15.14
  */
 
-namespace RetailOps\Api\Model\Collection\Order\Status\History;
+namespace RetailOps\Api\Model\Resource\Collection\InventoryHistory;
 
 
 class Collection extends \Magento\Framework\Model\ResourceModel\Db\Collection\AbstractCollection
@@ -14,8 +14,8 @@ class Collection extends \Magento\Framework\Model\ResourceModel\Db\Collection\Ab
     protected function _construct()
     {
         $this->_init(
-            '\RetailOps\Api\Model\Order\Status\History',
-            '\RetailOps\Api\Model\Resource\Order\Status\History'
+            '\RetailOps\Api\Model\InventoryHistory',
+            '\RetailOps\Api\Model\Resource\InventoryHistory'
         );
     }
 }

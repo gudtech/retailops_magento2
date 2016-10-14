@@ -6,7 +6,7 @@
  * Time: 9.30
  */
 
-namespace \RetailOps\Api\Model\Product;
+namespace RetailOps\Api\Model\Product;
 
 
 class Collection extends \Magento\Catalog\Model\ResourceModel\Collection\AbstractCollection

@@ -1,6 +1,6 @@
 <?php
 
-namespace \RetailOps\Api\Plugin;
+namespace RetailOps\Api\Plugin;
 
 use Magento\Framework\App\Action\Context;
 use Magento\Framework\App\ObjectManager;
@@ -8,8 +8,9 @@ use Magento\Framework\Exception\AuthenticationException;
 
 class Authorized
 {
-    const integration_key_value = 'retailops/_RetailOps/password';
+    const integration_key_value = 'retailops/RetailOps/password';
     const integration_key = 'integration_auth_token';
+
     /**
      * @var \Magento\Framework\App\ResponseInterface
      */
