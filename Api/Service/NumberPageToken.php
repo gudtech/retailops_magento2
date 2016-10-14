@@ -6,7 +6,7 @@
  * Time: 16.42
  */
 
-namespace \RetailOps\Api\Service;
+namespace RetailOps\Api\Service;
 
 
 class NumberPageToken

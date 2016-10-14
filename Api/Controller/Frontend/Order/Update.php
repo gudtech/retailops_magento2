@@ -59,7 +59,7 @@ class Update extends RetailOps
     }
 
 
-    public function __construct(RetailOps\Api\Model\Order\UpdateFactory $orderFactory,
+    public function __construct(\RetailOps\Api\Model\Order\UpdateFactory $orderFactory,
                                 \Magento\Framework\App\Action\Context $context )
     {
         $this->orderFactory = $orderFactory;
