@@ -14,4 +14,7 @@
     <event name="retailops_before_pull_inventory">
         <observer name="retail_ops_api_logger" instance="\RetailOps\Api\Observers\Logger" />
     </event>
+    <event name="retailops_before_pull_shipment_submit">
+        <observer name="retail_ops_api_logger" instance="\RetailOps\Api\Observers\Logger" />
+    </event>
 </config>

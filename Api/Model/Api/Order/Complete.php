@@ -79,6 +79,8 @@ class Complete
         }catch(\Exception $e) {
             $this->response['status'] = 'fail';
             $this->response['events'] = [];
+        }finally {
+            return $this->response;
         }
 
     }

@@ -120,7 +120,9 @@ class Order
                 continue;
             }
             $item['channel_item_refnum'] = $orderItem->getId();
-            $item['sku'] = $orderItem->getSku();
+            $products = $orderItem->getChildrenItems();
+            $product = reset($products);
+            $item['sku'] = $orderItem->getChildrenItems()[0]->getProduct()->getUpc();
             $item['sku_description'] = sprintf('UPC: %s', $orderItem->getData('upc'));
             $item['quantity'] = $this->getQuantity($orderItem);
             $item['item_type'] = $this->getItemType($orderItem);
