@@ -207,8 +207,8 @@ class Order
 
     public function getAuthPaymentTransaction($payments, $order)
     {
-        if($order->getStatus() === self::AUTH_STATUS)
-        {
+//        if($order->getStatus() === self::AUTH_STATUS)
+//        {
             $paymentA = [];
             $payment = $order->getPayment();
             $paymentA['payment_processing_type'] = self::$paymentProcessingType['default'];
@@ -216,7 +216,7 @@ class Order
             $paymentA['amount'] = (float)$payment->getBaseAmountPaid();
             $paymentA['transaction_type'] = 'auth';
             $payments[] = $paymentA;
-        }
+//        }
         return $payments;
     }
 
