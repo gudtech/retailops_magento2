@@ -14,6 +14,7 @@ use Magento\Framework\App\ObjectManager;
 class Order
 {
     const CONFIGURABLE = 'configurable';
+    const AUTH_STATUS = 'processing';
     /**
      * Status for retailops
      * @var array $retailopsItemStatus
@@ -121,9 +122,14 @@ class Order
             }
             $item['channel_item_refnum'] = $orderItem->getId();
             $products = $orderItem->getChildrenItems();
-            $product = reset($products);
-            $item['sku'] = $orderItem->getChildrenItems()[0]->getProduct()->getUpc();
-            $item['sku_description'] = sprintf('UPC: %s', $orderItem->getData('upc'));
+            if (count($products)) {
+                $product = reset($products);
+                $product = $product->getProduct();
+            }else{
+                $product = $orderItem->getProduct();
+            }
+            $item['sku'] = $product->getUpc();
+            $item['sku_description'] = sprintf('UPC: %s', $product->getUpc());
             $item['quantity'] = $this->getQuantity($orderItem);
             $item['item_type'] = $this->getItemType($orderItem);
             $item['currency_values'] = $this->getItemCurrencyValues($orderItem);
@@ -176,6 +182,7 @@ class Order
         $paymentR['payment_processing_type'] = self::$paymentProcessingType['default'];
         $paymentR['payment_type'] = $payment->getMethod();
         $paymentR['amount'] = (float)$payment->getBaseAmountPaid();
+        $paymentR['transaction_type'] = 'charge';
         return $this->getGiftPaymentTransaction([$paymentR], $order);
 
     }
@@ -193,6 +200,21 @@ class Order
             $paymentG['payment_processing_type'] = self::$paymentProcessingType['gift'];
             $paymentG['amount'] = (float)$order->getBaseGiftCardsAmount();
             $payments[] = $paymentG;
+        }
+        return $this->getAuthPaymentTransaction($payments, $order);
+    }
+
+    public function getAuthPaymentTransaction($payments, $order)
+    {
+        if($order->getStatus() === self::AUTH_STATUS)
+        {
+            $paymentA = [];
+            $payment = $order->getPayment();
+            $paymentA['payment_processing_type'] = self::$paymentProcessingType['default'];
+            $paymentA['payment_type'] = $payment->getMethod();
+            $paymentA['amount'] = (float)$payment->getBaseAmountPaid();
+            $paymentA['transaction_type'] = 'auth';
+            $payments[] = $paymentA;
         }
         return $payments;
     }

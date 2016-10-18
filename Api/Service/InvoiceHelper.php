@@ -8,7 +8,8 @@
 
 namespace RetailOps\Api\Service;
 
-
+use Magento\Framework\App\ObjectManager;
+use Magento\Framework\Exception\LocalizedException;
 class InvoiceHelper
 {
     /**
@@ -16,14 +17,15 @@ class InvoiceHelper
      */
     protected $invoiceService;
 
-    protected function isInvoice($itemId, \Magento\Sales\Model\Order $order)
+    /**
+     * @param \Magento\Sales\Model\Order $order
+     * @param $items
+     * @return bool
+     * @throws LocalizedException
+     */
+    public function createInvoice(\Magento\Sales\Model\Order $order, $items=[])
     {
-
-    }
-
-    public function createInvoice(\Magento\Sales\Model\Order $order, $items)
-    {
-        if($order->canInvoice()) {
+        if ($order->canInvoice()) {
             $invoice = $this->invoiceService->prepareInvoice($order, $items);
             if (!$invoice) {
                 throw new LocalizedException(__('We can\'t save the invoice right now.'));
@@ -34,34 +36,43 @@ class InvoiceHelper
                     __('You can\'t create an invoice without products.')
                 );
             }
-            //@todo create capture
-//            $invoice->setRequestedCaptureCase($data['capture_case']);
-                $invoice->addComment(
+             $invoice->addComment(
                     'Create for RetailOps'
-                );
+               );
 
 
             $invoice->register();
             $invoice->getOrder()->setIsInProcess(true);
-
-            $transactionSave = $this->_objectManager->create(
-                'Magento\Framework\DB\Transaction'
-            )->addObject(
-                $invoice
-            )->addObject(
-                $invoice->getOrder()
-            );
+            return $this->saveInvoice($invoice);
 
         }else{
-            throw new \LogicException(__(sprintf('Canno\'t create invoice for this order: ', $order->getId())));
+            return false;
         }
         return $invoice->getId() ? true : false;
     }
 
-
+    /**
+     * InvoiceHelper constructor.
+     * @param \Magento\Sales\Model\Service\InvoiceService $invoiceService
+     */
     public function __construct(\Magento\Sales\Model\Service\InvoiceService $invoiceService)
     {
         $this->invoiceService = $invoiceService;
+    }
+
+    /**
+     * @param \Magento\Sales\Model\Order\Invoice $invoice
+     */
+    public function saveInvoice(\Magento\Sales\Model\Order\Invoice $invoice)
+    {
+        $transactionSave = ObjectManager::getInstance()->create(
+            'Magento\Framework\DB\Transaction'
+        )->addObject(
+            $invoice
+        )->addObject(
+            $invoice->getOrder()
+        )->save();
+        return $invoice;
     }
 
 }

@@ -54,7 +54,7 @@ class Complete extends RetailOps
             $this->statusRetOps = 'error';
 
         } finally {
-            $this->response['events'] = [];
+            $this->response['events'] = $this->response['events'] ?? [] ;
             $this->response['status'] = $this->statusRetOps;
             foreach ($this->events as $event) {
                 $this->response['events'][] = $event;
