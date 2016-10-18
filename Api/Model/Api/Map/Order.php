@@ -66,6 +66,7 @@ class Order
         $prepareOrder['billing_address'] = $instance->getAddress($order, $order->getBillingAddress());
         $prepareOrder['shipping_address'] = $instance->getAddress($order, $order->getShippingAddress());
         $prepareOrder['order_items'] = $instance->getOrderItems($order);
+        $prepareOrder['ship_service_code'] = $order->getShippingMethod();
         //add gift message if available
         if ($order->getGiftMessageAvailable()) {
             $giftHelper = ObjectManager::getInstance()->get('Magento\GiftMessage\Helper\Message');
