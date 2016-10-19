@@ -16,7 +16,7 @@ class Inventory
 {
     const FROM = 'retailops';
     const INVENTORY_TYPE = 'retailops/_RetailOps/statuses_inventory';
-    const SKU = 'sku';
+    const SKU = 'upc';
     const QUANTITY = 'quantity_available';
 
     /**
@@ -88,13 +88,13 @@ class Inventory
     {
         $productsRetailOps = [];
         array_walk($inventory, function (&$item) use (&$productsRetailOps) {
-            if ($item->getSKU())
-                $productsRetailOps[$item->getSKU()] = (float)$item->getCount();
+            if ($item->getUPC())
+                $productsRetailOps[$item->getUPC()] = (float)$item->getCount();
         });
         $itemsLower = [];
         $itemsUpper = [];
         $collection = $this->_productCollectionFactory->create();
-        $collection->addAttributeToFilter('sku', ['in' => array_keys($productsRetailOps)]);
+        $collection->addAttributeToFilter('upc', ['in' => array_keys($productsRetailOps)]);
         //        $websiteId = $this->_store->getWebsite()->getId();
         $websites = $this->_store->getWebsites(true, true);
         $website = $websites['admin'];
@@ -109,28 +109,28 @@ class Inventory
             $inventoryHistory = $this->_InventoryHistoryFactory->create();
 
             $inventoryHistory->setProductId($item->getId());
-            $inventoryHistory->setInventoryArrived($productsRetailOps[$item->getData('sku')]);
+            $inventoryHistory->setInventoryArrived($productsRetailOps[$item->getData('upc')]);
 
             $inventoryHistory->setInventoryInShop($qty);
             $inventoryHistory->setWebsiteId($websiteId);
             $inventoryHistory->setStockId($stock_id);
             $inventoryHistory->setFrom(self::FROM);
-            if ($qty == 0 and $productsRetailOps[$item->getData('sku')] > 0) {
-                $productsForRefreshCache[$item->getId()] = ['stock' => $stock, 'inventory' => $productsRetailOps[$item->getData('sku')]];
+            if ($qty == 0 and $productsRetailOps[$item->getData('upc')] > 0) {
+                $productsForRefreshCache[$item->getId()] = ['stock' => $stock, 'inventory' => $productsRetailOps[$item->getData('upc')]];
             }
 
-            if ($qty > 0 and $productsRetailOps[$item->getData('sku')] <= 0) {
-                $productsForRefreshCache[$item->getId()] = ['stock' => $stock, 'inventory' => $productsRetailOps[$item->getData('sku')]];
+            if ($qty > 0 and $productsRetailOps[$item->getData('upc')] <= 0) {
+                $productsForRefreshCache[$item->getId()] = ['stock' => $stock, 'inventory' => $productsRetailOps[$item->getData('upc')]];
             }
-            if ($qty > $productsRetailOps[$item->getData('sku')]) {
-                $count = $qty - $productsRetailOps[$item->getData('sku')];
+            if ($qty > $productsRetailOps[$item->getData('upc')]) {
+                $count = $qty - $productsRetailOps[$item->getData('upc')];
                 $itemsLower[$item->getId()] = $count;
                 $inventoryHistory->setOperator('-');
                 $inventoryHistory->setInventoryAdd($count);
-                $this->logger->debug('productId-:' . $item->getId(), [$itemsLower[$item->getSku()]]);
+                $this->logger->debug('productId-:' . $item->getId(), [$itemsLower[$item->getId()]]);
             }
-            if ($qty < $productsRetailOps[$item->getData('sku')]) {
-                $count = $productsRetailOps[$item->getData('sku')] - $qty;
+            if ($qty < $productsRetailOps[$item->getData('upc')]) {
+                $count = $productsRetailOps[$item->getData('upc')] - $qty;
                 $itemsUpper[$item->getId()] = $count;
                 $inventoryHistory->setOperator('+');
                 $inventoryHistory->setInventoryAdd($count);
