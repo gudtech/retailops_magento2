@@ -9,6 +9,7 @@
 namespace RetailOps\Api\Model\Api\Traits;
 
 
+use Magento\Framework\App\ObjectManager;
 trait Filter
 {
     /**
@@ -62,5 +63,30 @@ trait Filter
             ->setConditionType($operator)
             ->setValue($value);
         return $filter;
+    }
+
+    /**
+     * @param $orders
+     */
+    public function setOrderIdByIncrementId(&$orders)
+    {
+        $resource = ObjectManager::getInstance()->get('Magento\Framework\App\ResourceConnection');
+        $connection = $resource->getConnection();
+        $select = $connection->select()->from('sales_order',['entity_id', 'increment_id'])
+            ->where('increment_id IN (:increment_ids)');
+        $bind = ['increment_ids' => join(array_keys($orders),',')];
+        $result = $connection->fetchAll($select, $bind);
+        if (count($result)) {
+            foreach ($result as $row) {
+                foreach ($orders as $key=>&$order) {
+                    if ((string)$key === (string)$row['increment_id']) {
+                        $orders[$row['entity_id']] = $order;
+                        unset($orders[$key]);
+                    }
+                }
+            }
+        }
+        return $orders;
+
     }
 }

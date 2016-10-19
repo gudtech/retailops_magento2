@@ -140,6 +140,7 @@ class Acknowledge
         if (!is_array($orders) || !count($orders)) {
             throw new \LogicException(__('Don\'t have any order\'s id in resquest'));
         }
+
         foreach ($orders as $order) {
             if (isset($order['channel_order_refnum'])) {
                 $this->orderIds[$order['channel_order_refnum']] = 1;
@@ -148,6 +149,8 @@ class Acknowledge
                 }
             }
         }
+        $this->setOrderIdByIncrementId($this->orderIds);
+        $this->setOrderIdByIncrementId($this->linkOrderRetail);
         return $this->orderIds;
     }
 }

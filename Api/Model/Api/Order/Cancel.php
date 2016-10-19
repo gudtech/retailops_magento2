@@ -62,7 +62,9 @@ class Cancel
     protected function getOrderId($orderInfo)
     {
         if (isset($orderInfo['channel_order_refnum'])) {
-            return $orderInfo['channel_order_refnum'];
+            $orderIncr[$orderInfo['channel_order_refnum']] = 1;
+            $orderId = array_keys($this->setOrderIdByIncrementId($orderIncr));
+            return reset($orderId);
         } else {
             $this->logger->addError('Invalid map', (array)$orderInfo);
             throw new \LogicException(__('invalid map'));

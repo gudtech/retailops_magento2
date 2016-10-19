@@ -58,7 +58,7 @@ class Order
     static public function prepareOrder($order, $instance)
     {
         $prepareOrder = [];
-        $prepareOrder['channel_order_refnum'] = $order->getId();
+        $prepareOrder['channel_order_refnum'] = $order->getIncrementId();
         $prepareOrder['currency_code'] = $order->getOrderCurrencyCode();
         $prepareOrder['currency_values'] = $instance->getCurrencyValues($order);
         $prepareOrder['channel_date_created'] = (new \DateTime($order->getCreatedAt(), new \DateTimeZone('UTC')))
@@ -76,6 +76,7 @@ class Order
         //@todo how send orders with coupon code and gift cart
         $prepareOrder['payment_transactions'] = $instance->getPaymentTransactions($order);
         $prepareOrder['customer_info'] = $instance->getCustmoerInfo($order);
+        $prepareOrder['ip_address'] = $order->getRemoteIp();
         return $instance->clearNullValues($prepareOrder);
     }
 
@@ -183,7 +184,7 @@ class Order
         $paymentR['payment_processing_type'] = self::$paymentProcessingType['default'];
         $paymentR['payment_type'] = $payment->getMethod();
         $paymentR['amount'] = (float)$order->getBaseGrandTotal();
-        $paymentR['transaction_type'] = 'charge';
+        $paymentR['transaction_type'] = 'auth';
         return $this->getGiftPaymentTransaction([$paymentR], $order);
 
     }
@@ -214,7 +215,7 @@ class Order
             $paymentA['payment_processing_type'] = self::$paymentProcessingType['default'];
             $paymentA['payment_type'] = $payment->getMethod();
             $paymentA['amount'] = (float)$payment->getBaseAmountPaid();
-            $paymentA['transaction_type'] = 'auth';
+            $paymentA['transaction_type'] = 'charge';
             $payments[] = $paymentA;
 //        }
         return $payments;
