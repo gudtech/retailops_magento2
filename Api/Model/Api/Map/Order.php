@@ -13,8 +13,14 @@ use Magento\Framework\App\ObjectManager;
 
 class Order
 {
+
     const CONFIGURABLE = 'configurable';
     const AUTH_STATUS = 'processing';
+
+    /**
+     * @var \RetailOps\Api\Api\Order\Map\UpcFinderInterface
+     */
+    protected $upcFinder;
     /**
      * Status for retailops
      * @var array $retailopsItemStatus
@@ -80,6 +86,11 @@ class Order
         return $instance->clearNullValues($prepareOrder);
     }
 
+    public function __construct(\RetailOps\Api\Api\Order\Map\UpcFinderInterface $upcFinder)
+    {
+        $this->upcFinder = $upcFinder;
+    }
+
     private function getCurrencyValues($order)
     {
         $values = [];
@@ -122,16 +133,20 @@ class Order
             if ($orderItem->getParentItem()) {
                 continue;
             }
-            $item['channel_item_refnum'] = $orderItem->getId();
-            $products = $orderItem->getChildrenItems();
-            if (count($products)) {
-                $product = reset($products);
-                $product = $product->getProduct();
+            /**
+             * @var $childProducts \Magento\Sales\Api\Data\OrderItemInterface[]
+             */
+            $childProducts = $orderItem->getChildrenItems();
+            if (count($childProducts)) {
+                $childProduct = reset($childProducts);
+                $product = $childProduct->getProduct();
             }else{
+                $childProduct = $orderItem;
                 $product = $orderItem->getProduct();
             }
-            $item['sku'] = $product->getUpc();
-            $item['sku_description'] = sprintf('UPC: %s', $product->getUpc());
+            $item['channel_item_refnum'] = $orderItem->getId();
+            $item['sku'] = $this->getUpcForRetailOps($childProduct, $product);
+            $item['sku_description'] = sprintf('in magento system is UPC: %s', $item['sku']);
             $item['quantity'] = $this->getQuantity($orderItem);
             $item['item_type'] = $this->getItemType($orderItem);
             $item['currency_values'] = $this->getItemCurrencyValues($orderItem);
@@ -139,6 +154,17 @@ class Order
         }
         return $items;
 
+    }
+
+    /**
+     * @param \Magento\Sales\Api\Data\OrderItemInterface $orderItem
+     * @param \Magento\Catalog\Api\Data\ProductInterface|null $product
+     * @return null|string
+     */
+    protected function getUpcForRetailOps(\Magento\Sales\Api\Data\OrderItemInterface $orderItem,
+                                          \Magento\Catalog\Api\Data\ProductInterface $product= null)
+    {
+        return $this->upcFinder->getUpc($orderItem, $product);
     }
 
     protected function getQuantity($item)
