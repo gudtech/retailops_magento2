@@ -210,7 +210,7 @@ class Order
         $paymentR['payment_processing_type'] = self::$paymentProcessingType['default'];
         $paymentR['payment_type'] = $payment->getMethod();
         $paymentR['amount'] = (float)$order->getBaseGrandTotal();
-        $paymentR['transaction_type'] = 'auth';
+        $paymentR['transaction_type'] = 'charge';
         return $this->getGiftPaymentTransaction([$paymentR], $order);
 
     }
@@ -229,23 +229,9 @@ class Order
             $paymentG['amount'] = (float)$order->getBaseGiftCardsAmount();
             $payments[] = $paymentG;
         }
-        return $this->getAuthPaymentTransaction($payments, $order);
-    }
-
-    public function getAuthPaymentTransaction($payments, $order)
-    {
-//        if($order->getStatus() === self::AUTH_STATUS)
-//        {
-            $paymentA = [];
-            $payment = $order->getPayment();
-            $paymentA['payment_processing_type'] = self::$paymentProcessingType['default'];
-            $paymentA['payment_type'] = $payment->getMethod();
-            $paymentA['amount'] = (float)$payment->getBaseAmountPaid();
-            $paymentA['transaction_type'] = 'charge';
-            $payments[] = $paymentA;
-//        }
         return $payments;
     }
+
 
     /**
      * @param  \Magento\Sales\Model\Order $order
