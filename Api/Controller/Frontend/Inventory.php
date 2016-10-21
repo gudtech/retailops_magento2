@@ -19,6 +19,10 @@ class Inventory extends RetailOps
     protected $response = [];
     protected $statusRetOps = 'success';
     protected $association = [];
+    /**
+     * @var \RetailOps\Api\Model\RoRicsLinkUpcRepository
+     */
+    protected $upcRepository;
 
     public function execute()
     {
@@ -31,7 +35,7 @@ class Inventory extends RetailOps
                 $inventories = $object->calculateInventory($inventories);
                 foreach ($inventories as $invent) {
                     $object = ObjectManager::getInstance()->create('\RetailOps\Api\Model\Inventory');
-                    $object->setUPC($invent[self::SKU]);
+                    $object->setUPC($this->upcRepository->getProductUpcByRoUpc($invent[self::SKU]));
                     $object->setCount($invent[self::QUANTITY]);
                     $inventoryObject[] = $object;
                 }
@@ -66,6 +70,12 @@ class Inventory extends RetailOps
         }
 
 
+    }
+
+    public function __construct(\Magento\Framework\App\Action\Context $context, \RetailOps\Api\Model\RoRicsLinkUpcRepository $linkUpcRepository)
+    {
+        $this->upcRepository = $linkUpcRepository;
+        parent::__construct($context);
     }
 
 }

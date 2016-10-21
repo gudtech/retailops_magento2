@@ -9,8 +9,14 @@
 namespace RetailOps\Api\Model\Api\Map;
 
 use \RetailOps\Api\Api\Order\Map\UpcFinderInterface;
+use \RetailOps\Api\Api\Data\RetailOpsRicsLinkByUpcRepositoryInterface;
+
 class UpcFinder implements UpcFinderInterface
 {
+    /**
+     * @var RetailOpsRicsLinkByUpcRepositoryInterface
+     */
+    protected $repository;
     /**
      * @param \Magento\Sales\Api\Data\OrderItemInterface $orderItem
      * @param \Magento\Catalog\Api\Data\ProductInterface|null $product
@@ -20,10 +26,15 @@ class UpcFinder implements UpcFinderInterface
                            \Magento\Catalog\Api\Data\ProductInterface $product = null)
     {
         if($product !== null) {
-            return $product->getUpc();
+            $upcValue = $product->getUpc();
         }else {
-            return $this->getUpcBySku($orderItem);
+            $upcValue = $this->getUpcBySku($orderItem);
         }
+        $upc = $this->repository->getRoUpc($upcValue);
+        if($upc->getId()) {
+            return $upc->getUpc();
+        }
+        return $upcValue;
     }
 
     /**
@@ -36,7 +47,12 @@ class UpcFinder implements UpcFinderInterface
         return ltrim($orderItem->getSku(),'\S\s');
     }
 
-    public function setUpc()
+    public function __construct(RetailOpsRicsLinkByUpcRepositoryInterface $linkByUpcRepository)
+    {
+        $this->repository = $linkByUpcRepository;
+    }
+
+    public function setRoUpc($upc)
     {
 
     }
