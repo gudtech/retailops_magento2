@@ -72,10 +72,16 @@ trait Filter
     {
         $resource = ObjectManager::getInstance()->get('Magento\Framework\App\ResourceConnection');
         $connection = $resource->getConnection();
+        $template = 'increment_id IN (%s)';
+        $orderKeys = array_keys($orders);
+        array_walk($orderKeys, [$this,'addQuote']);
+        $bind = join($orderKeys,',');
+        $where = sprintf($template, $bind);
         $select = $connection->select()->from('sales_order',['entity_id', 'increment_id'])
-            ->where('increment_id IN (:increment_ids)');
-        $bind = ['increment_ids' => join(array_keys($orders),',')];
-        $result = $connection->fetchAll($select, $bind);
+            ->where($where);
+
+
+        $result = $connection->fetchAll($select, []);
         if (count($result)) {
             foreach ($result as $row) {
                 foreach ($orders as $key=>&$order) {
@@ -88,5 +94,10 @@ trait Filter
         }
         return $orders;
 
+    }
+
+    public function addQuote($item)
+    {
+        return '`'.$item.'`';
     }
 }
