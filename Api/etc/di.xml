@@ -17,4 +17,9 @@
             <argument  name="upcFinder" xsi:type="object">RetailOps\Api\Model\Api\Map\UpcFinder</argument>
         </arguments>
     </type>
+    <type name="RetailOps\Api\Model\Api\Map\UpcFinder">
+        <arguments>
+            <argument  name="linkByUpcRepository" xsi:type="object">RetailOps\Api\Model\RoRicsLinkUpcRepository</argument>
+        </arguments>
+    </type>
 </config>

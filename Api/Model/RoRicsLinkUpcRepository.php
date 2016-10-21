@@ -20,6 +20,11 @@ class RoRicsLinkUpcRepository implements RetailOpsRicsLinkByUpcRepositoryInterfa
      * @var CollectionFactory
      */
     protected $collectionFactory;
+
+    /**
+     * @var Product\CollectionFactory
+     */
+    protected $productCollectionFactory;
     /**
      * @var Resource\RoRicsLinkUpc
      */
@@ -31,16 +36,25 @@ class RoRicsLinkUpcRepository implements RetailOpsRicsLinkByUpcRepositoryInterfa
     protected $roRicsLinkFactory;
 
     /**
+     * @var \RetailOps\Api\Logger\Logger
+     */
+    protected $logger;
+
+    /**
      * RoRicsLinkUpcRepository constructor.
      * @param CollectionFactory $collection
      */
     public function __construct(CollectionFactory $collection,
                                 \RetailOps\Api\Model\Resource\RoRicsLinkUpc $resource,
-                                \RetailOps\Api\Model\RoRicsLinkUpcFactory $roRicsLinkFactory)
+                                \RetailOps\Api\Model\RoRicsLinkUpcFactory $roRicsLinkFactory,
+                                \RetailOps\Api\Model\Product\CollectionFactory $productCollectionFactory,
+                                \RetailOps\Api\Logger\Logger $logger)
     {
         $this->collectionFactory = $collection;
+        $this->productCollectionFactory = $productCollectionFactory;
         $this->resource = $resource;
         $this->roRicsLinkFactory = $roRicsLinkFactory;
+        $this->logger = $logger;
     }
 
     public function save(\RetailOps\Api\Api\Data\RetailOpsRicsLinkByUpcInterface $link)
@@ -65,6 +79,39 @@ class RoRicsLinkUpcRepository implements RetailOpsRicsLinkByUpcRepositoryInterfa
         return $collection->getFirstItem();
 
     }
+
+    public function getProductUpcByRoUpc($upc)
+    {
+        $upcItems = $this->getAllUpcs($upc);
+        $upcs = [];
+        foreach ($upcItems as $upcLink)
+        {
+            $upcs[] = $upcLink->getUpc();
+        }
+        if(!count($upcs)) {
+            return null;
+        }
+        /**
+         * @var Product\Collection $productCollection
+         */
+        $productCollection = $this->productCollectionFactory->create();
+        $productCollection->addAttributeToFilter('upc', ['in' => $upcs]);
+        $productCollection->load();
+        $firstProduct = $productCollection->getFirstItem();
+        if(!$firstProduct->getId()) {
+            return null;
+        }
+        //check that only one product for all upc
+        foreach ($productCollection as $product) {
+            if ($product->getId() !== $firstProduct->getId()) {
+                $this->logger->addError('More than one product for upc:'.$upc);
+                throw new \LogicException(__('For upc'.$upc .'more than one product'));
+            }
+        }
+        return $firstProduct->getUpc();
+
+    }
+
 
     /**
      * @param string $upcValue

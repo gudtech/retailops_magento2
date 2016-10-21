@@ -77,7 +77,8 @@ class UpgradeSchema implements UpgradeSchemaInterface
     protected function addUpcFinderTable($installer)
     {
         if ($installer->getConnection()->isTableExists($installer->getTable('retailops_rics_retailops_link_upc'))) {
-            $installer->getConnection()->dropTable($installer->getTable('retailops_rics_retailops_link_upc'));
+            return;
+//            $installer->getConnection()->dropTable($installer->getTable('retailops_rics_retailops_link_upc'));
         }
         $table = $installer->getConnection()
                            ->newTable($installer->getTable('retailops_rics_retailops_link_upc'))

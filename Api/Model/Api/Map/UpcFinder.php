@@ -47,8 +47,7 @@ class UpcFinder implements UpcFinderInterface
         return ltrim($orderItem->getSku(),'\S\s');
     }
 
-    public function __construct(RetailOpsRicsLinkByUpcRepositoryInterface $linkByUpcRepository,
-                                )
+    public function __construct(RetailOpsRicsLinkByUpcRepositoryInterface $linkByUpcRepository)
     {
         $this->repository = $linkByUpcRepository;
     }
