@@ -5,6 +5,7 @@ use Magento\Framework\Exception\AuthenticationException;
 use \Magento\Framework\ObjectManagerInterface;
 class Order
 {
+    use \RetailOps\Api\Model\Api\Traits\Filter;
     /**
      * @var \Magento\Sales\Api\OrderRepositoryInterface
      */
@@ -32,6 +33,16 @@ class Order
      * @var Magento\Framework\Api\Filter[]
      */
     private $filters=[];
+
+    /**
+     * @var \Magento\Framework\Api\FilterFactory
+     */
+    protected $filter;
+
+    /**
+     * @var \Magento\Framework\Api\Search\FilterGroupFactory
+     */
+    protected $filterGroup;
 
     public function getOrders($pageToken, $maxcount = 1, $data)
     {
@@ -80,7 +91,7 @@ class Order
 
     private function addFilter( $name, \Magento\Framework\Api\Filter $filter)
     {
-        $this->filters[$name] = $this->createFilterGroup([$filter]);
+        $this->filters[$name] = $this->createFilterGroups([$filter]);
     }
 
     private function getFilters()
@@ -108,7 +119,7 @@ class Order
             $orders_id =  $this->getIdOrders($data['specific_orders']);
             if ($orders_id) {
                 $this->resetFilters();
-                $filter = $this->createFilter('entity_id','in', $orders_id);
+                $filter = $this->createFilter('entity_id','in', array_keys($orders_id));
                 $this->addFilter('specificOrder', $filter);
             }
         }
@@ -126,11 +137,11 @@ class Order
             foreach ($orders as $order_id) {
                 $val = $order_id['channel_refnum'];
                 if (is_numeric($val)) {
-                    $orders_id[] = $val;
+                    $orders_id[$val] = 1;
                 }
             }
         }
-        return $orders_id;
+        return $this->setOrderIdByIncrementId($orders_id);
     }
 
     protected function getCurrentPage($pageToken=null)
@@ -170,48 +181,19 @@ class Order
         return array($sortOrder);
     }
 
-    /**
-     * create a filter group using the given filters
-     *
-     * @param  \Magento\Framework\Api\Filter[] $filters
-     * @return \Magento\Framework\Api\Search\FilterGroup
-     */
-    private function createFilterGroup($filters)
-    {
-        // Add the filters to a filter group
-        $filterGroup = $this->ObjectManager->create('\Magento\Framework\Api\Search\FilterGroup');
-        $filterGroup->setFilters($filters);
-
-        return $filterGroup;
-    }
-
-    /**
-     * create a filter using the given field, operator and value
-     *
-     * @param  \string $field
-     * @param  \string $operator
-     * @param  \string $value
-     * @return \Magento\Framework\Api\Filter
-     */
-    private function createFilter($field, $operator, $value)
-    {
-        // Create a filter
-        $filter = $this->ObjectManager->create('\Magento\Framework\Api\Filter');
-        $filter->setField($field)
-            ->setConditionType($operator)
-            ->setValue($value);
-
-        return $filter;
-    }
 
     public function __construct(\Magento\Sales\Api\OrderRepositoryInterface $OrderRepository,
-                                   ObjectManagerInterface $objectManager,
-                                   \RetailOps\Api\Model\Api\Map\Order $RetailOrderMaps)
+                                ObjectManagerInterface $objectManager,
+                                \RetailOps\Api\Model\Api\Map\Order $RetailOrderMaps,
+                                \Magento\Framework\Api\FilterFactory $filter,
+                                \Magento\Framework\Api\Search\FilterGroupFactory $filterGroupFactory)
     {
         $this->OrderRepository = $OrderRepository;
         $this->ObjectManager = $objectManager;
         $this->RetailOrderMaps = $RetailOrderMaps;
         $this->searchCriteria = $this->ObjectManager->create('\Magento\Framework\Api\SearchCriteria');
+        $this->filter = $filter;
+        $this->filterGroup = $filterGroupFactory;
 
     }
 

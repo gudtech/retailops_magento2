@@ -15,7 +15,7 @@ class Inventory implements \RetailOps\Api\Api\InventoryInterface
 
     protected $count;
 
-    public function setSKU($sku)
+    public function setUPC($sku)
     {
         $this->sku = $sku;
     }
@@ -25,7 +25,7 @@ class Inventory implements \RetailOps\Api\Api\InventoryInterface
         $this->count = $count;
     }
 
-    public function getSKU()
+    public function getUPC()
     {
         return $this->sku;
     }

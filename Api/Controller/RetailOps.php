@@ -21,6 +21,11 @@ abstract class RetailOps extends \Magento\Framework\App\Action\Action
     protected $action;
 
     /**
+     * @var  \Psr\Log\LoggerInterface
+     */
+    protected $logger;
+
+    /**
      * @var int
      */
     protected $version;

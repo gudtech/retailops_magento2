@@ -15,7 +15,7 @@ interface InventoryInterface
      * @param string|integer $productId
      * @return null
      */
-    public function setSKU($sku);
+    public function setUPC($sku);
 
     /**
      * @param string|integer $count
@@ -33,6 +33,6 @@ interface InventoryInterface
     /**
      * @return string|null|integer
      */
-    public function getSKU();
+    public function getUPC();
 
 }

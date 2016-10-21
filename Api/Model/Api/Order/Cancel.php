@@ -19,25 +19,14 @@ class Cancel
     public function cancel($orderInfo)
     {
         try {
-        $orderId = $this->getOrderId($orderInfo);
-        $order = $this->orderRepository->get($orderId);
-        if ($order->getId()) {
-            if ($order->canUnhold()) {
-                $order->unhold();
-            }
-            try{
-                $this->historyRetail->setParentId($order->getId());
+            $orderId = $this->getOrderId($orderInfo);
+            $order = $this->orderRepository->get($orderId);
+            if ($order->getId()) {
+                if ($order->canUnhold()) {
+                      $order->unhold();
+                }
                 $this->cancelOrder($order);
-            } catch (\Exception $e) {
-                $this->status = 'fail';
-                $this->setEventsInfo($e);
-                $this->historyRetail->setComment($e->getMessage());
-            }finally{
-                $this->historyRetail->setStatus($this->status);
-                $this->historyRetail->setCreatedAt( \date('Y-m-d H:i:s'));
-                $this->historyRetail->save();
             }
-        }
         } catch (\Exception $e) {
             $this->status = 'fail';
             $this->setEventsInfo($e);
@@ -73,7 +62,9 @@ class Cancel
     protected function getOrderId($orderInfo)
     {
         if (isset($orderInfo['channel_order_refnum'])) {
-            return $orderInfo['channel_order_refnum'];
+            $orderIncr[$orderInfo['channel_order_refnum']] = 1;
+            $orderId = array_keys($this->setOrderIdByIncrementId($orderIncr));
+            return reset($orderId);
         } else {
             $this->logger->addError('Invalid map', (array)$orderInfo);
             throw new \LogicException(__('invalid map'));

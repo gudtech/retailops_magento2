@@ -11,6 +11,7 @@ namespace RetailOps\Api\Model\Api\Order;
 
 class Complete
 {
+    const COMPLETE = 'complete';
     /**
      * @var \Magento\Sales\Api\OrderRepositoryInterface
      */
@@ -48,9 +49,20 @@ class Complete
      */
     protected $shipmentLoader;
 
+    /**
+     * @var array|null
+     */
     protected $response;
 
+    /**
+     * @var \RetailOps\Api\Api\Shipment\ShipmentInterface
+     */
     protected $shipment;
+
+    /**
+     * @var \RetailOps\Api\Service\InvoiceHelper
+     */
+    protected $invoiceHelper;
 
     /**
      * @param array $postData
@@ -68,17 +80,21 @@ class Complete
             if (!$order->getId()) {
                 throw new \LogicException(sprintf('Don\'t have order with refnum %s', $postData['channel_order_refnum']));
             }
-            /**
-             * @var $shipment \RetailOps\Api\Service\Shipment\Complete
-             */
             $shipment = $this->shipment;
             $shipment->setOrder($order);
+            //create invoice, with shipments items
+            $shipment->setUnShippedItems($postData);
+            $shipment->setTrackingAndShipmentItems($postData);
+            $order->setStatus(self::COMPLETE);
+            $this->invoiceHelper->createInvoice($order, $this->shipment->getShippmentItems()['items']);
             $shipment->registerShipment($postData);
 
 
         }catch(\Exception $e) {
             $this->response['status'] = 'fail';
-            $this->response['events'] = [];
+            $this->response['events'] = $this->response['events'] ?? [];
+        }finally {
+            return $this->response;
         }
 
     }
@@ -105,15 +121,19 @@ class Complete
     /**
      * Complete constructor.
      * @param \Magento\Sales\Api\OrderRepositoryInterface $orderRepository
-     * @param \\RetailOps\Api\Logger\Logger $logger
+     * @param \RetailOps\Api\Logger\Logger $logger
+     * @param \RetailOps\Api\Api\Shipment\ShipmentInterface
+     * @param \RetailOps\Api\Service\InvoiceHelper $invoiceHelper
      */
     public function __construct(\Magento\Sales\Api\OrderRepositoryInterface $orderRepository,
                                 \RetailOps\Api\Logger\Logger $logger,
-                                \RetailOps\Api\Api\Shipment\ShipmentInterface $shipment)
+                                \RetailOps\Api\Api\Shipment\ShipmentInterface $shipment,
+                                \RetailOps\Api\Service\InvoiceHelper $invoiceHelper)
     {
         $this->orderRepository = $orderRepository;
         $this->logger =  $logger;
         $this->shipment = $shipment;
+        $this->invoiceHelper = $invoiceHelper;
     }
 
 

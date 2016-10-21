@@ -13,7 +13,14 @@ use Magento\Framework\App\ObjectManager;
 
 class Order
 {
+
     const CONFIGURABLE = 'configurable';
+    const AUTH_STATUS = 'processing';
+
+    /**
+     * @var \RetailOps\Api\Api\Order\Map\UpcFinderInterface
+     */
+    protected $upcFinder;
     /**
      * Status for retailops
      * @var array $retailopsItemStatus
@@ -57,7 +64,7 @@ class Order
     static public function prepareOrder($order, $instance)
     {
         $prepareOrder = [];
-        $prepareOrder['channel_order_refnum'] = $order->getId();
+        $prepareOrder['channel_order_refnum'] = $order->getIncrementId();
         $prepareOrder['currency_code'] = $order->getOrderCurrencyCode();
         $prepareOrder['currency_values'] = $instance->getCurrencyValues($order);
         $prepareOrder['channel_date_created'] = (new \DateTime($order->getCreatedAt(), new \DateTimeZone('UTC')))
@@ -65,6 +72,7 @@ class Order
         $prepareOrder['billing_address'] = $instance->getAddress($order, $order->getBillingAddress());
         $prepareOrder['shipping_address'] = $instance->getAddress($order, $order->getShippingAddress());
         $prepareOrder['order_items'] = $instance->getOrderItems($order);
+        $prepareOrder['ship_service_code'] = $order->getShippingMethod();
         //add gift message if available
         if ($order->getGiftMessageAvailable()) {
             $giftHelper = ObjectManager::getInstance()->get('Magento\GiftMessage\Helper\Message');
@@ -74,7 +82,13 @@ class Order
         //@todo how send orders with coupon code and gift cart
         $prepareOrder['payment_transactions'] = $instance->getPaymentTransactions($order);
         $prepareOrder['customer_info'] = $instance->getCustmoerInfo($order);
+        $prepareOrder['ip_address'] = $order->getRemoteIp();
         return $instance->clearNullValues($prepareOrder);
+    }
+
+    public function __construct(\RetailOps\Api\Api\Order\Map\UpcFinderInterface $upcFinder)
+    {
+        $this->upcFinder = $upcFinder;
     }
 
     private function getCurrencyValues($order)
@@ -119,9 +133,20 @@ class Order
             if ($orderItem->getParentItem()) {
                 continue;
             }
+            /**
+             * @var $childProducts \Magento\Sales\Api\Data\OrderItemInterface[]
+             */
+            $childProducts = $orderItem->getChildrenItems();
+            if (count($childProducts)) {
+                $childProduct = reset($childProducts);
+                $product = $childProduct->getProduct();
+            }else{
+                $childProduct = $orderItem;
+                $product = $orderItem->getProduct();
+            }
             $item['channel_item_refnum'] = $orderItem->getId();
-            $item['sku'] = $orderItem->getSku();
-            $item['sku_description'] = sprintf('UPC: %s', $orderItem->getData('upc'));
+            $item['sku'] = $this->getUpcForRetailOps($childProduct, $product);
+            $item['sku_description'] = sprintf('in magento system is UPC: %s', $item['sku']);
             $item['quantity'] = $this->getQuantity($orderItem);
             $item['item_type'] = $this->getItemType($orderItem);
             $item['currency_values'] = $this->getItemCurrencyValues($orderItem);
@@ -129,6 +154,17 @@ class Order
         }
         return $items;
 
+    }
+
+    /**
+     * @param \Magento\Sales\Api\Data\OrderItemInterface $orderItem
+     * @param \Magento\Catalog\Api\Data\ProductInterface|null $product
+     * @return null|string
+     */
+    protected function getUpcForRetailOps(\Magento\Sales\Api\Data\OrderItemInterface $orderItem,
+                                          \Magento\Catalog\Api\Data\ProductInterface $product= null)
+    {
+        return $this->upcFinder->getUpc($orderItem, $product);
     }
 
     protected function getQuantity($item)
@@ -173,7 +209,8 @@ class Order
         $payment = $order->getPayment();
         $paymentR['payment_processing_type'] = self::$paymentProcessingType['default'];
         $paymentR['payment_type'] = $payment->getMethod();
-        $paymentR['amount'] = (float)$payment->getBaseAmountPaid();
+        $paymentR['amount'] = (float)$order->getBaseGrandTotal();
+        $paymentR['transaction_type'] = 'charge';
         return $this->getGiftPaymentTransaction([$paymentR], $order);
 
     }
@@ -194,6 +231,7 @@ class Order
         }
         return $payments;
     }
+
 
     /**
      * @param  \Magento\Sales\Model\Order $order

@@ -2,10 +2,19 @@
     <preference for="RetailOps\Api\Api\Data\InventoryHistorySearchInterface" type="Magento\Framework\Api\SearchResults" />
     <preference for="RetailOps\Api\Api\Data\InventoryHistoryInterface" type="RetailOps\Api\Model\InventoryHistory" />
     <preference for="RetailOps\Api\Api\InventoryHistoryInterface" type="RetailOps\Api\Model\InventoryHistoryRepository" />
-    <preference for="RetailOps\Api\Api\InventoryHistoryInterface" type="RetailOps\Api\Model\InventoryHistoryRepository" />
     <type name="RetailOps\Api\Model\Api\Order\Complete">
         <arguments>
             <argument shared="false" name="shipment" xsi:type="object">\RetailOps\Api\Service\Shipment\Complete</argument>
+        </arguments>
+    </type>
+    <type name="RetailOps\Api\Model\Shipment\ShipmentSubmit">
+        <arguments>
+            <argument shared="false" name="shipment" xsi:type="object">\RetailOps\Api\Service\Shipment\ShipmentSubmit</argument>
+        </arguments>
+    </type>
+    <type name="RetailOps\Api\Model\Api\Map\Order">
+        <arguments>
+            <argument  name="upcFinder" xsi:type="object">RetailOps\Api\Model\Api\Map\UpcFinder</argument>
         </arguments>
     </type>
 </config>

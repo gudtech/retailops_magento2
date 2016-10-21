@@ -31,13 +31,13 @@ class Inventory extends RetailOps
                 $inventories = $object->calculateInventory($inventories);
                 foreach ($inventories as $invent) {
                     $object = ObjectManager::getInstance()->create('\RetailOps\Api\Model\Inventory');
-                    $object->setSKU($invent[self::SKU]);
+                    $object->setUPC($invent[self::SKU]);
                     $object->setCount($invent[self::QUANTITY]);
                     $inventoryObject[] = $object;
                 }
                 $inventoryApi = ObjectManager::getInstance()->create('\RetailOps\Api\Model\Inventory\Inventory');
                 foreach ($inventoryObject as $inventory){
-                    $this->association[] = ['identifier_type' => 'sku_number', 'identifier'=>$inventory->getSKU()];
+                    $this->association[] = ['identifier_type' => 'sku_number', 'identifier'=>$inventory->getUPC()];
                 }
                 $state = ObjectManager::getInstance()->get('\Magento\Framework\App\State');
                 $state->emulateAreaCode(\Magento\Framework\App\Area::AREA_WEBAPI_REST, [$inventoryApi, 'setInventory'], [$inventoryObject]);

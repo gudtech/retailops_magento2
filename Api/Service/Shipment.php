@@ -51,6 +51,7 @@ abstract class Shipment implements \RetailOps\Api\Api\Shipment\ShipmentInterface
      */
     public function setUnShippedItems(array $postData = [])
     {
+        $this->unShippmentItems = [];
         if(!count($postData)) {
             return;
         }
@@ -64,6 +65,8 @@ abstract class Shipment implements \RetailOps\Api\Api\Shipment\ShipmentInterface
 
     public function setTrackingAndShipmentItems(array $postData = [])
     {
+        $this->shippmentItems = [];
+        $this->tracking = [];
         if( !isset($postData['shipments']) ) {
             return;
         }
@@ -144,22 +147,22 @@ abstract class Shipment implements \RetailOps\Api\Api\Shipment\ShipmentInterface
 
     private function calcQuantity($itemId, $quantity)
     {
-        if (isset($this->unShippmentItems[$itemId])) {
-            $unShipQuantity =  $this->unShippmentItems[$itemId];
-            if ($unShipQuantity >= $quantity) {
-                $unShipQuantity = $unShipQuantity - $quantity;
-                if ( $unShipQuantity === 0 ) {
-                    unset($this->unShippmentItems[$itemId]);
-
-                }else{
-                    $this->unShippmentItems[$itemId] = $unShipQuantity;
-                }
-                $quantity = 0;
-            } else {
-                $quantity = $quantity - $unShipQuantity;
-                unset($this->unShippmentItems[$itemId]);
-            }
-        }
+//        if (isset($this->unShippmentItems[$itemId])) {
+//            $unShipQuantity =  $this->unShippmentItems[$itemId];
+//            if ($unShipQuantity >= $quantity) {
+//                $unShipQuantity = $unShipQuantity - $quantity;
+//                if ( $unShipQuantity === 0 ) {
+//                    unset($this->unShippmentItems[$itemId]);
+//
+//                }else{
+//                    $this->unShippmentItems[$itemId] = $unShipQuantity;
+//                }
+//                $quantity = 0;
+//            } else {
+//                $quantity = $quantity - $unShipQuantity;
+//                unset($this->unShippmentItems[$itemId]);
+//            }
+//        }
         return $quantity;
     }
 
