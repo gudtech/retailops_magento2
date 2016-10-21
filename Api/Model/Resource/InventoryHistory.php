@@ -13,6 +13,6 @@ class InventoryHistory extends \Magento\Framework\Model\ResourceModel\Db\Abstrac
 {
     protected function _construct()
     {
-        $this->_init('retailops/inventory_history', 'id');
+        $this->_init('retailops_inventory_history', 'id');
     }
 }

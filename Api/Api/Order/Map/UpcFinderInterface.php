@@ -19,5 +19,9 @@ interface UpcFinderInterface
     public function getUpc(\Magento\Sales\Api\Data\OrderItemInterface $orderItem,
                            \Magento\Catalog\Api\Data\ProductInterface $product=null);
 
-    public function setUpc();
+    /**
+     * @param \RetailOps\Api\Api\Data\RetailOpsRicsLinkByUpcInterface $upc
+     * @return $this
+     */
+    public function setRoUpc($upc);
 }

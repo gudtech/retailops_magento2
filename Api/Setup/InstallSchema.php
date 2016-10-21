@@ -17,7 +17,7 @@ class InstallSchema implements InstallSchemaInterface
         $installer = $setup;
         $installer->startSetup();
         $table = $installer->getConnection()
-            ->newTable($installer->getTable('retailops/inventory_history'))
+            ->newTable($installer->getTable('retailops_inventory_history'))
             ->addColumn(
                 'id',
                 \Magento\Framework\DB\Ddl\Table::TYPE_INTEGER,
