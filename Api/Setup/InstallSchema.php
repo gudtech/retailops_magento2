@@ -68,6 +68,7 @@ class InstallSchema implements InstallSchemaInterface
                     'Date Create'
                 );
         $installer->getConnection()->createTable($table);
+
         $installer->endSetup();
     }
 }

@@ -11,6 +11,7 @@ class Inventory extends RetailOps
     const SKU = 'sku';
     const QUANTITY = 'calc_inventory';
     const SERVICENAME = 'inventory';
+    const ENABLE = 'retailops/RetailOps_feed/inventory_push';
     /**
      * @var string
      */
@@ -18,6 +19,10 @@ class Inventory extends RetailOps
     protected $events = [];
     protected $response = [];
     protected $statusRetOps = 'success';
+    /**
+     * @var \RetailOps\Api\Service\CalculateInventory
+     */
+    protected $inventory;
     protected $association = [];
     /**
      * @var \RetailOps\Api\Model\RoRicsLinkUpcRepository
@@ -27,24 +32,33 @@ class Inventory extends RetailOps
     public function execute()
     {
         try {
-
+            $scopeConfig = $this->_objectManager->get('\Magento\Framework\App\Config\ScopeConfigInterface');
+            if(!$scopeConfig->getValue(self::ENABLE)) {
+                throw new \LogicException('This feed disable');
+            }
             $inventories = $this->getRequest()->getParam(self::PARAM);
-            if (count($inventories)) {
+            $inventoryObjects = [];
+            if (is_array($inventories) && count($inventories)) {
                 $inventory = [];
-                $object = ObjectManager::getInstance()->create('\RetailOps\Api\Model\Inventory\Inventory');
-                $inventories = $object->calculateInventory($inventories);
+                $inventories = $this->inventory->calculateInventory($inventories);
                 foreach ($inventories as $invent) {
-                    $object = ObjectManager::getInstance()->create('\RetailOps\Api\Model\Inventory');
-                    $object->setUPC($this->upcRepository->getProductUpcByRoUpc($invent[self::SKU]));
-                    $object->setCount($invent[self::QUANTITY]);
-                    $inventoryObject[] = $object;
+                    $upcs = $this->upcRepository->getProductUpcByRoUpc($invent[self::SKU]);
+                    //if for one rics_integration Id can be many products
+                    foreach ($upcs as $upc) {
+                        $object = ObjectManager::getInstance()->create('\RetailOps\Api\Model\Inventory');
+                        $object->setUPC($upc);
+                        $object->setCount($invent[self::QUANTITY]);
+                        $inventoryObjects[] = $object;
+                    }
+                    $upcs = [];
                 }
+                $this->inventory->addInventoiesFromNotSendedOrderYet($inventoryObjects);
                 $inventoryApi = ObjectManager::getInstance()->create('\RetailOps\Api\Model\Inventory\Inventory');
-                foreach ($inventoryObject as $inventory){
+                foreach ($inventoryObjects as $inventory){
                     $this->association[] = ['identifier_type' => 'sku_number', 'identifier'=>$inventory->getUPC()];
                 }
                 $state = ObjectManager::getInstance()->get('\Magento\Framework\App\State');
-                $state->emulateAreaCode(\Magento\Framework\App\Area::AREA_WEBAPI_REST, [$inventoryApi, 'setInventory'], [$inventoryObject]);
+                $state->emulateAreaCode(\Magento\Framework\App\Area::AREA_WEBAPI_REST, [$inventoryApi, 'setInventory'], [$inventoryObjects]);
             }
         }catch (\Exception $e) {
             $event = [
@@ -72,9 +86,12 @@ class Inventory extends RetailOps
 
     }
 
-    public function __construct(\Magento\Framework\App\Action\Context $context, \RetailOps\Api\Model\RoRicsLinkUpcRepository $linkUpcRepository)
+    public function __construct(\Magento\Framework\App\Action\Context $context,
+                                \RetailOps\Api\Model\RoRicsLinkUpcRepository $linkUpcRepository,
+                                \RetailOps\Api\Service\CalculateInventory $inventory)
     {
         $this->upcRepository = $linkUpcRepository;
+        $this->inventory = $inventory;
         parent::__construct($context);
     }
 

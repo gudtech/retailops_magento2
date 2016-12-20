@@ -11,7 +11,14 @@
             <RetailOps>
                 <turn_on>1</turn_on>
                 <enable_log>1</enable_log>
+                <order_count>20</order_count>
             </RetailOps>
+            <RetailOps_feed>
+                <inventory_push>1</inventory_push>
+            </RetailOps_feed>
+            <RetailOps_advanced>
+                <cancel_queue>1</cancel_queue>
+            </RetailOps_advanced>
         </retailops>
     </default>
 </config>

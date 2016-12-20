@@ -32,7 +32,7 @@ class UpcFinder implements UpcFinderInterface
         }
         $upc = $this->repository->getRoUpc($upcValue);
         if($upc->getId()) {
-            return $upc->getUpc();
+            return (string)$upc->getUpc();
         }
         return $upcValue;
     }
@@ -54,7 +54,7 @@ class UpcFinder implements UpcFinderInterface
 
     public function setRoUpc($upc)
     {
-
+        $this->repository->setRoUpc($upc);
     }
 
 }

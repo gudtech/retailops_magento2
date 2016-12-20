@@ -35,4 +35,26 @@ interface InventoryInterface
      */
     public function getUPC();
 
+    /**
+     * @param string|integer|float $realCount
+     * @return mixed
+     */
+    public function setRealCount($realCount);
+
+    /**
+     * @return mixed
+     */
+    public function getRealCount();
+
+    /**
+     * @param float $reserveCount
+     * @return mixed
+     */
+    public function setReserveCount($reserveCount);
+
+    /**
+     * @return mixed
+     */
+    public function getReserveCount();
+
 }

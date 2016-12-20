@@ -15,9 +15,8 @@ use Magento\Framework\Indexer\CacheContext;
 class Inventory
 {
     const FROM = 'retailops';
-    const INVENTORY_TYPE = 'retailops/_RetailOps/statuses_inventory';
     const SKU = 'upc';
-    const QUANTITY = 'quantity_available';
+
 
     /**
      * @var \RetailOps\Api\Api\InventoryHistoryInterface
@@ -79,6 +78,11 @@ class Inventory
      */
     protected $_scopeConfig;
 
+    /**
+     * @var \RetailOps\Api\Service\CalculateInventory
+     */
+    protected $_calculateInventory;
+
 
 
     /**
@@ -87,14 +91,18 @@ class Inventory
     public function setInventory($inventory)
     {
         $productsRetailOps = [];
-        array_walk($inventory, function (&$item) use (&$productsRetailOps) {
-            if ($item->getUPC())
+        $inventoryObjects = [];
+        array_walk($inventory, function (&$item) use (&$productsRetailOps, &$inventoryObjects) {
+            if ($item->getUPC()){
                 $productsRetailOps[$item->getUPC()] = (float)$item->getCount();
+                $inventoryObjects[$item->getUPC()] = $item;
+            }
         });
         $itemsLower = [];
         $itemsUpper = [];
         $collection = $this->_productCollectionFactory->create();
         $collection->addAttributeToFilter('upc', ['in' => array_keys($productsRetailOps)]);
+        $collection->setStoreId(0);
         //        $websiteId = $this->_store->getWebsite()->getId();
         $websites = $this->_store->getWebsites(true, true);
         $website = $websites['admin'];
@@ -115,12 +123,16 @@ class Inventory
             $inventoryHistory->setWebsiteId($websiteId);
             $inventoryHistory->setStockId($stock_id);
             $inventoryHistory->setFrom(self::FROM);
-            if ($qty == 0 and $productsRetailOps[$item->getData('upc')] > 0) {
+            $inventoryHistory->setReserveCount($inventoryObjects[$item->getData('upc')]->getReserveCount());
+            $inventoryHistory->setRealCount($inventoryObjects[$item->getData('upc')]->getRealCount());
+            if ($qty <= 0 and $productsRetailOps[$item->getData('upc')] > 0) {
                 $productsForRefreshCache[$item->getId()] = ['stock' => $stock, 'inventory' => $productsRetailOps[$item->getData('upc')]];
+                $this->logger->debug('cleanCache:', [$item->getId()]);
             }
 
             if ($qty > 0 and $productsRetailOps[$item->getData('upc')] <= 0) {
                 $productsForRefreshCache[$item->getId()] = ['stock' => $stock, 'inventory' => $productsRetailOps[$item->getData('upc')]];
+                $this->logger->debug('cleanCache:', [$item->getId()]);
             }
             if ($qty > $productsRetailOps[$item->getData('upc')]) {
                 $count = $qty - $productsRetailOps[$item->getData('upc')];
@@ -161,7 +173,9 @@ class Inventory
         foreach ($products as $productId =>$items){
             $ids[] = $productId;
         }
+        //fire event
         if(count($ids)>0){
+            $this->_eventManager->dispatch('sales_catalog_product_change_stock_status', ['products'=> $ids]);
             $cache = $this->getCacheContext();
             $cache->registerEntities(\Magento\Catalog\Model\Product::CACHE_TAG, $ids);
             $this->_eventManager->dispatch('clean_cache_by_tags', ['object' => $cache]);
@@ -178,7 +192,7 @@ class Inventory
      * @param \Magento\CatalogInventory\Model\ResourceModel\Stock $stockRepositories
      * @param \Magento\Store\Model\StoreManagerInterface $store
      * @param \Magento\CatalFFogInventory\Model\Stock\StockItemRepository $stockItem
-     * @param \\RICSApi\Model\InventoryHistory $InventoryHistory
+     * @param \RICSApi\Model\InventoryHistory $InventoryHistory
      */
     public function __construct(\RetailOps\Api\Logger\Logger $logger,
                                 \RetailOps\Api\Model\Product\CollectionFactory $productCollectionFactory,
@@ -189,9 +203,9 @@ class Inventory
                                 \RetailOps\Api\Api\Data\InventoryHistoryInterfaceFactory $InventoryHistory,
                                 \RetailOps\Api\Api\InventoryHistoryInterface $inventoryHistoryRepository,
                                 \Magento\Framework\ObjectManagerInterface $objectManager,
-                                \Magento\Framework\Event\ManagerInterface $eventManager,
                                 \Magento\Catalog\Model\ProductFactory $productFactory,
-                                \Magento\Framework\View\Element\Context $context)
+                                \Magento\Framework\View\Element\Context $context,
+                                \RetailOps\Api\Service\CalculateInventory $calculateInventory)
     {
         $this->logger = $logger;
         $this->_productCollectionFactory = $productCollectionFactory;
@@ -201,10 +215,11 @@ class Inventory
         $this->_stockItem = $stockItem;
         $this->_InventoryHistoryFactory = $InventoryHistory;
         $this->_objectManager = $objectManager;
-        $this->_eventManager = $eventManager;
+        $this->_eventManager = $context->getEventManager();
         $this->_productFactory = $productFactory;
         $this->_scopeConfig = $context->getScopeConfig();
         $this->_inventoryHistoryRepository = $inventoryHistoryRepository;
+        $this->_calculateInventory = $calculateInventory;
     }
 
     protected function getCacheContext()
@@ -218,39 +233,9 @@ class Inventory
      */
     public function calculateInventory(array $inventories)
     {
-        $inventoryTypes =  $this->_scopeConfig->getValue(self::INVENTORY_TYPE);
-        if( $inventoryTypes === null ) {
-            return $this->setDefaultInventories($inventories);
-        }
-        $inventoryTypes = explode(',', $inventoryTypes);
-        foreach ($inventories as &$inventory)
-        {
-            $quantityDetail = $inventory['quantity_detail'];
-            $count = 0;
-            foreach ($quantityDetail as $quantity) {
-                if ( in_array($quantity['quantity_type'], $inventoryTypes)
-                    || (in_array('empty', $inventoryTypes) && $quantity['quantity_type'] == '')) {
-                    $count += (float)$quantity['total_quantity'];
-                }
+        return $this->_calculateInventory->calculateInventory($inventories);
 
-            }
-            $inventory['calc_inventory'] = $count;
-        }
-
-        return $inventories;
     }
 
-    /**
-     * @param array $inventories
-     * @return array
-     */
-    public function setDefaultInventories($inventories)
-    {
-        foreach ($inventories as &$inventory)
-        {
-            $inventory['calc_inventory'] = $inventory[self::QUANTITY];
-        }
 
-        return $inventories;
-    }
 }

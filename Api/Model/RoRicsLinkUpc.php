@@ -19,6 +19,11 @@ class RoRicsLinkUpc extends AbstractModel implements RetailOpsRicsLinkByUpcInter
         return parent::getData(self::RICS_ID);
     }
 
+    public function getId()
+    {
+        return parent::getData(self::ID);
+    }
+
     public function getUpc()
     {
         return parent::getData(self::UPC);
@@ -40,11 +45,19 @@ class RoRicsLinkUpc extends AbstractModel implements RetailOpsRicsLinkByUpcInter
     }
 
     /**
-     * @param  string $upc
+     * @param  bool $value
      */
-    public function setRoUpc($upc)
+    public function setRoUpc(bool $value)
     {
-       return parent::setData(self::RO_UPC, $upc);
+        //for using cascade index set to null
+        if($value === false){
+            return parent::setData(self::RO_UPC, null);
+        }
+       return parent::setData(self::RO_UPC, (int)$value);
     }
 
+    protected function _construct()
+    {
+        parent::_init('\RetailOps\Api\Model\Resource\RoRicsLinkUpc');
+    }
 }

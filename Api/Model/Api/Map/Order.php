@@ -10,17 +10,31 @@ namespace RetailOps\Api\Model\Api\Map;
 
 
 use Magento\Framework\App\ObjectManager;
+use \RetailOps\Api\Model\Api\Map\Order as OrderMap;
 
 class Order
 {
 
     const CONFIGURABLE = 'configurable';
     const AUTH_STATUS = 'processing';
+    //order pull to
+    const ORDER_PULL_STATUS = 2;
+    const ORDER_NO_SEND_STATUS = 0;
 
     /**
      * @var \RetailOps\Api\Api\Order\Map\UpcFinderInterface
      */
     protected $upcFinder;
+
+    /**
+     * @var \RetailOps\Api\Service\CalculateDiscountInterface
+     */
+    protected $calculateDiscount;
+
+    /**
+     * @var \RetailOps\Api\Service\Order\Map\RewardPointsInterface
+     */
+    protected $rewardPoints;
     /**
      * Status for retailops
      * @var array $retailopsItemStatus
@@ -40,15 +54,25 @@ class Order
     ];
 
     /**
-     * @param array $orders
+     * @var \RetailOps\Api\Api\Order\Map\CalculateAmountInterface
+     */
+    public $calculateAmount;
+
+    /**
+     * @param \Magento\Sales\Api\Data\OrderInterface[] $orders
      * @return array
      */
     public function getOrders($orders)
     {
         if (count($orders)) {
             $prepareOrders = [];
+            /**
+             * @var \Magento\Sales\Api\Data\OrderInterface $order
+             */
             foreach ($orders as $order) {
                 $prepareOrders[] = Order::prepareOrder($order, $this);
+                $order->setData('retailops_send_status', OrderMap::ORDER_PULL_STATUS);
+                $order->save();
             }
 
             return $prepareOrders;
@@ -61,7 +85,7 @@ class Order
      * @param Order $instance
      * @return mixed
      */
-    static public function prepareOrder($order, $instance)
+    static public function prepareOrder( \Magento\Sales\Api\Data\OrderInterface $order, $instance)
     {
         $prepareOrder = [];
         $prepareOrder['channel_order_refnum'] = $order->getIncrementId();
@@ -86,17 +110,23 @@ class Order
         return $instance->clearNullValues($prepareOrder);
     }
 
-    public function __construct(\RetailOps\Api\Api\Order\Map\UpcFinderInterface $upcFinder)
+    public function __construct(\RetailOps\Api\Api\Order\Map\UpcFinderInterface $upcFinder,
+                                \RetailOps\Api\Service\CalculateDiscountInterface $calculateDiscount,
+                                \RetailOps\Api\Service\CalculateItemPriceInterface $calculateItemPrice,
+                                \RetailOps\Api\Api\Order\Map\CalculateAmountInterface $calculateAmount)
     {
         $this->upcFinder = $upcFinder;
+        $this->calculateDiscount = $calculateDiscount;
+        $this->calculateItemPrice = $calculateItemPrice;
+        $this->calculateAmount = $calculateAmount;
     }
 
     private function getCurrencyValues($order)
     {
         $values = [];
-        $values['shipping_amt'] = (float)$order->getShippingAmount();
-        $values['tax_amt'] = (float)$order->getTaxAmount();
-        $values['discount_amt'] = (float)$order->getDiscountAmount();
+        $values['shipping_amt'] = $this->calculateAmount->calculateShipping($order);
+//        $values['tax_amt'] = (float)$order->getTaxAmount();
+        $values['discount_amt'] = $this->calculateDiscount->calculate($order);
         return $values;
     }
 
@@ -146,10 +176,10 @@ class Order
             }
             $item['channel_item_refnum'] = $orderItem->getId();
             $item['sku'] = $this->getUpcForRetailOps($childProduct, $product);
-            $item['sku_description'] = sprintf('in magento system is UPC: %s', $item['sku']);
-            $item['quantity'] = $this->getQuantity($orderItem);
+//            $item['sku_description'] = sprintf('in magento system is UPC: %s', $item['sku']);
             $item['item_type'] = $this->getItemType($orderItem);
             $item['currency_values'] = $this->getItemCurrencyValues($orderItem);
+            $item['quantity'] = $this->getQuantity($orderItem);
             $items[] = $item;
         }
         return $items;
@@ -179,7 +209,7 @@ class Order
     protected function getItemType($item)
     {
         //@todo after design shiiping with retaiops add logic for orders
-        return 'advisory';
+        return 'ship';
     }
 
     /**
@@ -192,10 +222,14 @@ class Order
         if ($item->getParentItem()) {
             $item = $item->getParentItem();
         }
+        /** before RO fix discount error
         $itemCurrency['discount_amt'] = (float)$item->getDiscountAmount();
+        $itemCurrency['discount_pct'] = (float)$item->getDiscountPercent();
         $itemCurrency['unit_price'] = (float)$item->getBasePrice();
-        $itemCurrency['unit_tax'] = (float)$item->getTaxAmount();
-        $itemCurrency['unit_tax_pct'] = (float)$item->getTaxPercent();
+         **/
+        //calculate items price before RO fix discount error
+        $itemCurrency['unit_price'] = $this->calculateItemPrice->calculate($item);
+        $itemCurrency['unit_tax'] = $this->calculateItemPrice->calculateItemTax($item);
         return $itemCurrency;
     }
 
@@ -209,7 +243,7 @@ class Order
         $payment = $order->getPayment();
         $paymentR['payment_processing_type'] = self::$paymentProcessingType['default'];
         $paymentR['payment_type'] = $payment->getMethod();
-        $paymentR['amount'] = (float)$order->getBaseGrandTotal();
+        $paymentR['amount'] = $this->calculateAmount->calculateGrandTotal($order);
         $paymentR['transaction_type'] = 'charge';
         return $this->getGiftPaymentTransaction([$paymentR], $order);
 

@@ -51,6 +51,11 @@ abstract class RetailOps extends \Magento\Framework\App\Action\Action
      */
     protected $status = 200;
 
+    /**
+     * @var array
+     */
+    protected $association = [];
+
 
     public function dispatch(RequestInterface $request)
     {

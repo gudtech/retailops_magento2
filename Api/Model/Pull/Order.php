@@ -3,6 +3,9 @@ namespace RetailOps\Api\Model\Pull;
 
 use Magento\Framework\Exception\AuthenticationException;
 use \Magento\Framework\ObjectManagerInterface;
+use \RetailOps\Api\Model\Api\Map\Order as OrderMap;
+use \Magento\Sales\Model\Order as MagentoOrder;
+
 class Order
 {
     use \RetailOps\Api\Model\Api\Traits\Filter;
@@ -52,9 +55,9 @@ class Order
         $this->countPages = $result->getLastPageNumber();
         $orderItems = $this->RetailOrderMaps->getOrders($result->getItems());
         if ($this->getNextPageToken()) {
-            $orders['next_page_token'] = $this->getNextPageToken();
+            //only for test, after test uncommit next line
+//            $orders['next_page_token'] = $this->getNextPageToken();
         }
-
         $orders['orders'] = $orderItems;
         return $orders;
     }
@@ -75,21 +78,49 @@ class Order
     protected function setFilters($pageToken, $maxcount,$data)
     {
         $this->setData($pageToken, $maxcount, $data);
+        $this->addOrderStatuses();
+        $this->addInvoiceExlude();
         $this->setSpecificOrders($data);
         $this->addFilterGroups();
     }
 
     private function setData($pageToken, $maxcount, $data)
     {
-            $filter = $this->createFilter('retailops_send_status', 'eq', 0);
+            $filter = $this->createFilter('retailops_send_status', 'in', [OrderMap::ORDER_NO_SEND_STATUS, OrderMap::ORDER_PULL_STATUS]);
             $this->addFilter('retail_status',$filter);
             $page = $this->getCurrentPage($pageToken);
             $this->searchCriteria->setPageSize($maxcount);
             $this->searchCriteria->setCurrentPage($page);
             $this->currentPage = $page;
+
     }
 
-    private function addFilter( $name, \Magento\Framework\Api\Filter $filter)
+    private function addOrderStatuses()
+    {
+        $this->addExludeStatuses();
+        $this->addIncludeStatuses();
+
+    }
+
+    private function addExludeStatuses()
+    {
+        $filter = $this->createFilter('state', 'nin', [MagentoOrder::STATE_CANCELED, MagentoOrder::STATE_HOLDED]);
+        $this->addFilter('order_not_send_status', $filter);
+    }
+
+    private function addIncludeStatuses()
+    {
+        $filter = $this->createFilter('status', 'in', [MagentoOrder::STATE_PROCESSING]);
+        $this->addFilter('order_send_status', $filter);
+    }
+
+    private function addInvoiceExlude()
+    {
+        $filter = $this->createFilter('base_total_invoiced','gt', 0);
+        $this->addFilter('order_should_invoiced',$filter);
+    }
+
+    protected function addFilter( $name, \Magento\Framework\Api\Filter $filter)
     {
         $this->filters[$name] = $this->createFilterGroups([$filter]);
     }
@@ -117,11 +148,9 @@ class Order
     {
         if (isset($data['specific_orders'])) {
             $orders_id =  $this->getIdOrders($data['specific_orders']);
-            if ($orders_id) {
-                $this->resetFilters();
-                $filter = $this->createFilter('entity_id','in', array_keys($orders_id));
-                $this->addFilter('specificOrder', $filter);
-            }
+            $this->resetFilters();
+            $filter = $this->createFilter('entity_id','in', array_keys($orders_id));
+            $this->addFilter('specificOrder', $filter);
         }
     }
 
@@ -149,7 +178,7 @@ class Order
         $page = 1;
         if($pageToken) {
             if ($pageToken === 'string') {
-                return 1;
+                return $page;
             }
             $service = $this->ObjectManager->get('\\RetailOps\Api\Service\NumberPageToken');
             $pageNumber = $service->decode($pageToken);

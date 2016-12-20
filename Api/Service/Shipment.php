@@ -85,19 +85,22 @@ abstract class Shipment implements \RetailOps\Api\Api\Shipment\ShipmentInterface
                 if ($carrierName === null) {
                     continue;
                 }
-                //try to find retailops carrier in magento carriers, else use custom label
-                if (isset($magentoTracking[$carrierName])) {
-                    $tracking[] = [
-                        'carrier_code' => $carrierName,
-                        'title' => $magentoTracking[$carrierName]->getConfigData('title'),
-                        'number' => isset($package['tracking_number']) ? $package['tracking_number'] : null
-                    ];
-                } else {
-                    $tracking[] = [
-                        'carrier_code' => 'custom',
-                        'title' => $package['carrier_class_name'] ?? 'RetailOps',
-                        'number' => isset($package['tracking_number']) ? $package['tracking_number'] : null
-                    ];
+                if(isset($package['tracking_number']) && !empty($package['tracking_number'])) {
+
+                    //try to find retailops carrier in magento carriers, else use custom label
+                    if (isset($magentoTracking[$carrierName])) {
+                        $tracking[] = [
+                            'carrier_code' => $carrierName,
+                            'title' => $magentoTracking[$carrierName]->getConfigData('title'),
+                            'number' => isset($package['tracking_number']) ? $package['tracking_number'] : null
+                        ];
+                    } else {
+                        $tracking[] = [
+                            'carrier_code' => 'custom',
+                            'title' => $package['carrier_class_name'] ?? 'RetailOps',
+                            'number' => isset($package['tracking_number']) ? $package['tracking_number'] : null
+                        ];
+                    }
                 }
                 $this->setShipmentsItems($package['package_items']);
                 $this->tracking = $tracking;
@@ -178,6 +181,7 @@ abstract class Shipment implements \RetailOps\Api\Api\Shipment\ShipmentInterface
         $shipment->addComment(__('Shipment from retailops'), true, true);
         $shipment->register();
         $this->_saveShipment($shipment);
+        $this->sendEmail($shipment);
 
     }
 
@@ -249,6 +253,11 @@ abstract class Shipment implements \RetailOps\Api\Api\Shipment\ShipmentInterface
         $this->setUnShippedItems($postData);
         $this->setTrackingAndShipmentItems($postData);
         $this->createShipment($this->getOrder());
+    }
+
+    protected function sendEmail($shipment)
+    {
+        $this->shipmentSender->send($shipment);
     }
 
 

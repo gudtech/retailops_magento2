@@ -8,6 +8,10 @@ class Cancel
 {
     use \RetailOps\Api\Model\Api\Traits\Filter;
 
+    /**
+     * @var \RetailOps\Api\Api\Services\CreditMemo\CreditMemoHelperInterface
+     */
+    protected $creditMemoHelper;
     protected $response;
     protected $status = 'success';
     protected $events = [];
@@ -62,9 +66,7 @@ class Cancel
     protected function getOrderId($orderInfo)
     {
         if (isset($orderInfo['channel_order_refnum'])) {
-            $orderIncr[$orderInfo['channel_order_refnum']] = 1;
-            $orderId = array_keys($this->setOrderIdByIncrementId($orderIncr));
-            return reset($orderId);
+            return $this->getOrderIdByIncrement($orderInfo['channel_order_refnum']);
         } else {
             $this->logger->addError('Invalid map', (array)$orderInfo);
             throw new \LogicException(__('invalid map'));
@@ -85,7 +87,8 @@ class Cancel
                                 \Magento\Framework\Api\SearchCriteria $searchCriteria,
                                 \Magento\Framework\Api\FilterFactory $filter,
                                 \Magento\Framework\Api\Search\FilterGroupFactory $filterGroup,
-                                \RetailOps\Api\Model\Order\Status\History $historyRetail
+                                \RetailOps\Api\Model\Order\Status\History $historyRetail,
+                                \RetailOps\Api\Api\Services\CreditMemo\CreditMemoHelperInterface $creditMemoHelper
     )
     {
         $this->orderRepository = $orderRepository;
@@ -94,6 +97,7 @@ class Cancel
         $this->filter = $filter;
         $this->filterGroup = $filterGroup;
         $this->historyRetail = $historyRetail;
+        $this->creditMemoHelper = $creditMemoHelper;
     }
 
     /**
@@ -103,13 +107,21 @@ class Cancel
      * @returns \bool
      * @throws  \Magento\Framework\Exception\LocalizedException
      */
-    private function cancelOrder($order)
+    private function cancelOrder(\Magento\Sales\Api\Data\OrderInterface $order)
     {
         if (!$order->canCancel()) {
-            throw new LocalizedException(__('Order cannot be Canceled'));
+//            throw new \LogicException(__('Order cannot be Canceled'));
+           return  $this->allRefund($order);
         }
 
         $order->cancel();
         $order->save();
+    }
+
+    private function allRefund(\Magento\Sales\Api\Data\OrderInterface $order)
+    {
+        $shippingRefund = $order->getShippingAmount() - $order->getShippingDiscountAmount();
+        $this->creditMemoHelper->setShippingAmount($shippingRefund);
+        $this->creditMemoHelper->create($order, []);
     }
 }

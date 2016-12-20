@@ -74,4 +74,24 @@ class InventoryHistory extends AbstractModel implements InventoryHistoryInterfac
         $this->_init('RetailOps\Api\Model\Resource\InventoryHistory');
     }
 
+    public function setRealCount($realCount)
+    {
+        return parent::setData(self::REAL_COUNT, $realCount);
+    }
+
+    public function getRealCount()
+    {
+        return parent::getData(self::REAL_COUNT);
+    }
+
+    public function setReserveCount($reserveCount)
+    {
+        return parent::setData(self::RESERVE_COUNT, $reserveCount);
+    }
+
+    public function getReserveCount()
+    {
+        return parent::getData(self::RESERVE_COUNT);
+    }
+
 }

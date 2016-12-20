@@ -1,22 +1,4 @@
-<?xml version="1.0"?>
-<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-
-    <type name="\RetailOps\Api\Controller\RetailOps">
-        <plugin name="authorize" type="\RetailOps\Api\Plugin\Authorized" />
-    </type>
-    <type name="\RetailOps\Api\Logger\Base">
-        <arguments>
-            <argument name="filesystem" xsi:type="object">Magento\Framework\Filesystem\Driver\File</argument>
-        </arguments>
-    </type>
-    <type name="\RetailOps\Api\Logger\Logger">
-        <arguments>
-            <argument name="name" xsi:type="string">retailLogger</argument>
-            <argument name="handlers"  xsi:type="array">
-                <item name="system" xsi:type="object">\RetailOps\Api\Logger\Base</item>
-            </argument>
-        </arguments>
-    </type>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
     <type name="Magento\Framework\App\RouterList">
         <arguments>
             <argument name="routerList" xsi:type="array">

@@ -1,0 +1,138 @@
+<?xml version="1.0"?>
+<listing xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd">
+    <argument name="data" xsi:type="array">
+        <item name="js_config" xsi:type="array">
+            <item name="provider" xsi:type="string">retailops_api_log.retailops_api_log_data_source</item>
+            <item name="deps" xsi:type="string">retailops_api_log.retailops_api_log_data_source</item>
+        </item>
+        <item name="spinner" xsi:type="string">retailops_api_log_columns</item>
+    </argument>
+    <dataSource name="retailops_api_log_data_source">
+        <argument name="dataProvider" xsi:type="configurableObject">
+            <argument name="class" xsi:type="string">RetailOps\Api\Ui\Component\Listing\DataProviders\Retailops\Api\Log</argument>
+            <argument name="name" xsi:type="string">retailops_api_log_data_source</argument>
+            <argument name="primaryFieldName" xsi:type="string">id</argument>
+            <argument name="requestFieldName" xsi:type="string">id</argument>
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="update_url" xsi:type="url" path="mui/index/render"/>
+                    <item name="storageConfig" xsi:type="array">
+                        <item name="indexField" xsi:type="string">id</item>
+                    </item>
+                </item>
+            </argument>
+        </argument>
+        <argument name="data" xsi:type="array">
+            <item name="js_config" xsi:type="array">
+                <item name="component" xsi:type="string">Magento_Ui/js/grid/provider</item>
+            </item>
+        </argument>
+    </dataSource>
+    <columns name="retailops_api_log_columns">
+        <column name="id">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <!--<item name="filter" xsi:type="string">textRange</item>-->
+                    <!--<item name="sorting" xsi:type="string">asc</item>-->
+                    <item name="label" xsi:type="string" translate="true">ID</item>
+                </item>
+            </argument>
+        </column>
+        <actionsColumn name="actions" class="RetailOps\Api\Ui\Component\Listing\Column\Retailopsapilog\ProductLink">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="draggable" xsi:type="boolean">false</item>
+                    <item name="indexField" xsi:type="string">product_id</item>
+                    <item name="indexFieldName" xsi:type="string">id</item>
+                    <item name="align" xsi:type="string">left</item>
+                    <item name="label" xsi:type="string" translate="true">Action</item>
+                    <item name="filterable" xsi:type="boolean">false</item>
+                    <item name="sortable" xsi:type="boolean">false</item>
+                </item>
+                <item name="itemsAction" xsi:type="array">
+                    <item name="select" xsi:type="array">
+                        <item name="label" xsi:type="string" translate="true">Go to product</item>
+                        <item name="path"  xsi:type="string">catalog/product/edit</item>
+                    </item>
+                </item>
+            </argument>
+        </actionsColumn>
+        <column name="product_id">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="filter" xsi:type="string">textRange</item>
+                    <item name="class" xsi:type="string">RetailOps\Api\Ui\Component\Listing\Column\Retailopsapilog\ProductLink</item>
+                    <!--<item name="sorting" xsi:type="string">asc</item>-->
+                    <item name="label" xsi:type="string" translate="true">product_id</item>
+
+                </item>
+            </argument>
+        </column>
+        <column name="inventory_arrived">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <!--<item name="filter" xsi:type="string">textRange</item>-->
+                    <!--<item name="sorting" xsi:type="string">asc</item>-->
+                    <item name="label" xsi:type="string" translate="true">Inventory Arrived</item>
+                </item>
+            </argument>
+        </column>
+        <column name="real_count">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <!--<item name="filter" xsi:type="string">textRange</item>-->
+                    <!--<item name="sorting" xsi:type="string">asc</item>-->
+                    <item name="label" xsi:type="string" translate="true">Count from RO</item>
+                </item>
+            </argument>
+        </column>
+        <column name="reserve_count">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <!--<item name="filter" xsi:type="string">textRange</item>-->
+                    <!--<item name="sorting" xsi:type="string">asc</item>-->
+                    <item name="label" xsi:type="string" translate="true">Count reserved by not sended orders</item>
+                </item>
+            </argument>
+        </column>
+        <column name="inventory_in_shop">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <!--<item name="filter" xsi:type="string">textRange</item>-->
+                    <!--<item name="sorting" xsi:type="string">asc</item>-->
+                    <item name="label" xsi:type="string" translate="true">inventory in shop</item>
+                </item>
+            </argument>
+        </column>
+        <column name="operator">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <!--<item name="filter" xsi:type="string">textRange</item>-->
+                    <!--<item name="sorting" xsi:type="string">asc</item>-->
+                    <item name="label" xsi:type="string" translate="true">operator</item>
+                </item>
+            </argument>
+        </column>
+        <column name="inventory_add">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <!--<item name="filter" xsi:type="string">textRange</item>-->
+                    <!--<item name="sorting" xsi:type="string">asc</item>-->
+                    <item name="label" xsi:type="string" translate="true">Inventory Add</item>
+                </item>
+            </argument>
+        </column>
+        <column name="date_create">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <!--<item name="filter" xsi:type="string">textRange</item>-->
+                    <item name="sorting" xsi:type="string">desc</item>
+                    <item name="label" xsi:type="string" translate="true">Inventory Add</item>
+                </item>
+            </argument>
+        </column>
+    </columns>
+    <listingToolbar name="listing_top">
+        <paging name="listing_paging"/>
+    </listingToolbar>
+</listing>

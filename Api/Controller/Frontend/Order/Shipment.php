@@ -14,6 +14,7 @@ class Shipment  extends RetailOps
 {
     const SERVICENAME = 'shipment_submit';
     const COUNT_ORDERS_PER_REQUEST = 50;
+    const ENABLE = 'retailops/RetailOps_feed/order_shipment_submit';
     /**
      * @var string
      */
@@ -46,6 +47,10 @@ class Shipment  extends RetailOps
     public function execute()
     {
         try {
+            $scopeConfig = $this->_objectManager->get('\Magento\Framework\App\Config\ScopeConfigInterface');
+            if(!$scopeConfig->getValue(self::ENABLE)) {
+                throw new \LogicException('This feed disable');
+            }
             $postData = (array)$this->getRequest()->getPost();
             $response = $this->shipmentSubmit->updateOrder($postData);
             $this->response = $response;
@@ -60,9 +65,12 @@ class Shipment  extends RetailOps
             $this->error = $e;
             $this->events[] = $event;
             $this->statusRetOps = 'error';
-
+            parent::execute();
         } finally {
-            $this->response['status'] = $this->response['status'] ?? $this->statusRetOps;
+            if(!array_key_exists('events', $this->response)) {
+                $this->response['events'] = [];
+            }
+//            $this->response['status'] = $this->response['status'] ?? $this->statusRetOps;
             foreach ($this->events as $event) {
                 $this->response['events'][] = $event;
             }

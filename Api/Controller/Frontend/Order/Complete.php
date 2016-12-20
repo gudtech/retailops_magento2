@@ -14,10 +14,11 @@ use \RetailOps\Api\Controller\RetailOps;
 class Complete extends RetailOps
 {
     const SERVICENAME = 'order_complete';
-
+    const ENABLE = 'retailops/RetailOps_feed/order_complete';
     protected $events = [];
     protected $response = [];
     protected $statusRetOps = 'success';
+
     /**
      * @var \\RetailOps\Model\Order\Complete
      */
@@ -34,6 +35,10 @@ class Complete extends RetailOps
     {
 
         try {
+            $scopeConfig = $this->_objectManager->get('\Magento\Framework\App\Config\ScopeConfigInterface');
+            if(!$scopeConfig->getValue(self::ENABLE)) {
+                throw new \LogicException('This feed disable');
+            }
             $postData = (array)$this->getRequest()->getPost();
             /**
              * @var \RetailOps\Api\Model\Order\Complete
@@ -52,7 +57,7 @@ class Complete extends RetailOps
             $this->error = $e;
             $this->events[] = $event;
             $this->statusRetOps = 'error';
-
+            parent::execute();
         } finally {
             $this->response['events'] = $this->response['events'] ?? [] ;
             $this->response['status'] = $this->statusRetOps;

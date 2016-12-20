@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+/**
+ * Copyright © 2016 Magento. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+-->
+<listing xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd">
+<columns>
+    <actionsColumn name="retailops_send_status" class="Magento\Ui\Component\Listing\Columns\Column">
+        <argument name="data" xsi:type="array">
+            <item name="js_config" xsi:type="array">
+                <item name="component" xsi:type="string">Magento_Ui/js/grid/columns/column</item>
+            </item>
+            <item name="config" xsi:type="array">
+                <item name="bodyTmpl" xsi:type="string">ui/grid/cells/text</item>
+                <item name="filter" xsi:type="string">text</item>
+                <item name="visible" xsi:type="boolean">true</item>
+                <item name="dataType" xsi:type="string">text</item>
+                <item name="align" xsi:type="string">left</item>
+                <item name="label" xsi:type="string" translate="true">Retailops status</item>
+            </item>
+        </argument>
+    </actionsColumn>
+    <actionsColumn name="retailops_order_id"  class="Magento\Ui\Component\Listing\Columns\Column">
+        <argument name="data" xsi:type="array">
+            <item name="js_config" xsi:type="array">
+                <item name="component" xsi:type="string">Magento_Ui/js/grid/columns/column</item>
+            </item>
+            <item name="config" xsi:type="array">
+                <item name="bodyTmpl" xsi:type="string">ui/grid/cells/text</item>
+                <item name="filter" xsi:type="string">text</item>
+                <item name="visible" xsi:type="boolean">true</item>
+                <item name="dataType" xsi:type="string">text</item>
+                <item name="align" xsi:type="string">left</item>
+                <item name="label" xsi:type="string" translate="true">Retailops order id</item>
+            </item>
+        </argument>
+    </actionsColumn>
+</columns>
+</listing>

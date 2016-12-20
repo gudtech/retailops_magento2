@@ -15,6 +15,7 @@ use \RetailOps\Api\Controller\RetailOps;
 class Cancel extends RetailOps
 {
     const SERVICENAME = 'order_cancel';
+    const ENABLE = 'retailops/RetailOps_feed/order_cancel';
     /**
      * @var string
      */
@@ -22,6 +23,10 @@ class Cancel extends RetailOps
     public function execute()
     {
         try{
+            $scopeConfig = $this->_objectManager->get('\Magento\Framework\App\Config\ScopeConfigInterface');
+            if(!$scopeConfig->getValue(self::ENABLE)) {
+                throw new \LogicException('This feed disable');
+            }
             $postData = $this->getRequest()->getPost();
             $orderFactrory = $this->orderFactory->create();
             $response = $orderFactrory->cancelOrder($postData);
@@ -31,6 +36,7 @@ class Cancel extends RetailOps
             $this->response = (object)null;
             $this->status = 500;
             $this->error = $e;
+            parent::execute();
         }finally{
             $this->getResponse()->representJson(json_encode($this->response));
             $this->getResponse()->setStatusCode($this->status);

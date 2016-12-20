@@ -11,6 +11,7 @@ namespace RetailOps\Api\Model\Api;
 
 class Acknowledge
 {
+    const ACK_STATUS = 1;
     use Traits\Filter;
     /**
      * @var array
@@ -71,9 +72,9 @@ class Acknowledge
             if ($result) {
                 foreach ($result as $order) {
                     if (isset($this->orderIds[$order->getId()])) {
-                        $order->setData('retailops_send_status', 1);
-                        if (isset($this->linkOrderRetail[$order->getId()])) {
-                            $order->setData('retailops_order_id', $this->linkOrderRetail[$order->getId()]);
+                        $order->setData('retailops_send_status', self::ACK_STATUS);
+                        if ($this->orderIds[$order->getId()] !== 0 ) {
+                            $order->setData('retailops_order_id', $this->orderIds[$order->getId()]);
                         }
                         $order->save();
                         unset($this->orderIds[$order->getId()]);
@@ -143,14 +144,14 @@ class Acknowledge
 
         foreach ($orders as $order) {
             if (isset($order['channel_order_refnum'])) {
-                $this->orderIds[$order['channel_order_refnum']] = 1;
+                $this->orderIds[$order['channel_order_refnum']] = 0;
                 if (isset($order['retailops_order_id'])) {
-                    $this->linkOrderRetail[$order['channel_order_refnum']] = $order['retailops_order_id'];
+                    $this->orderIds[$order['channel_order_refnum']] = $order['retailops_order_id'];
                 }
             }
         }
-        $this->setOrderIdByIncrementId($this->orderIds);
-        $this->setOrderIdByIncrementId($this->linkOrderRetail);
+        $this->orderIds = $this->setOrderIdByIncrementId($this->orderIds);
+//        $this->setOrderIdByIncrementId($this->linkOrderRetail);
         return $this->orderIds;
     }
 }

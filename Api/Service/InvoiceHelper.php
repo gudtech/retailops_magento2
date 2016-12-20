@@ -12,6 +12,10 @@ use Magento\Framework\App\ObjectManager;
 use Magento\Framework\Exception\LocalizedException;
 class InvoiceHelper
 {
+    public static $captureOnlinePayment = [
+        'braintree'=>1,
+        'paypal'=>1
+    ];
     /**
      * @var \Magento\Sales\Model\Service\InvoiceService
      */
@@ -25,8 +29,14 @@ class InvoiceHelper
      */
     public function createInvoice(\Magento\Sales\Model\Order $order, $items=[])
     {
+        if(!count($items)>0)
+            return false;
         if ($order->canInvoice()) {
             $invoice = $this->invoiceService->prepareInvoice($order, $items);
+            if($this->captureOnline($order))
+            {
+                $invoice->setRequestedCaptureCase(\Magento\Sales\Model\Order\Invoice::CAPTURE_ONLINE);
+            }
             if (!$invoice) {
                 throw new LocalizedException(__('We can\'t save the invoice right now.'));
             }
@@ -50,6 +60,18 @@ class InvoiceHelper
         }
         return $invoice->getId() ? true : false;
     }
+
+    public function captureOnline(\Magento\Sales\Model\Order $order)
+    {
+        $method = $order->getPayment()->getMethod();
+        if(array_key_exists($method, $this::$captureOnlinePayment)){
+            return true;
+        }
+
+        return false;
+    }
+
+
 
     /**
      * InvoiceHelper constructor.

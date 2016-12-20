@@ -14,13 +14,17 @@ use \RetailOps\Api\Controller\RetailOps;
 class Update extends RetailOps
 {
     const SERVICENAME = 'order_update';
-
+    const ENABLE = 'retailops/RetailOps_feed/order_update';
     protected $events = [];
     protected $response = [];
     protected $status = 'success';
     public function execute()
     {
         try {
+            $scopeConfig = $this->_objectManager->get('\Magento\Framework\App\Config\ScopeConfigInterface');
+            if(!$scopeConfig->getValue(self::ENABLE)) {
+                throw new \LogicException('This feed disable');
+            }
             $postData = $this->getRequest()->getPost();
             $orderFactrory = $this->orderFactory->create();
             $response = $orderFactrory->updateOrder($postData);

@@ -66,12 +66,28 @@ trait Filter
     }
 
     /**
+     * @param string|int $order
+     * @return string|null
+     */
+    public function getOrderIdByIncrement($orderInc)
+    {
+        $orders[$orderInc] = 1;
+        $ordersId = array_keys($this->setOrderIdByIncrementId($orders));
+        if(!is_array($ordersId) || !count($ordersId)) {
+            throw new \LogicException(__('This increment id doesn\'t exists'));
+        }
+        $orderId = reset($ordersId);
+        return $orderId;
+    }
+
+    /**
      * @param $orders
      */
-    public function setOrderIdByIncrementId(&$orders)
+    public function setOrderIdByIncrementId($orders)
     {
         $resource = ObjectManager::getInstance()->get('Magento\Framework\App\ResourceConnection');
         $connection = $resource->getConnection();
+        $existsOrders = [];
         $template = 'increment_id IN (%s)';
         $orderKeys = array_keys($orders);
         array_walk($orderKeys, [$this,'addQuote']);
@@ -84,15 +100,14 @@ trait Filter
         $result = $connection->fetchAll($select, []);
         if (count($result)) {
             foreach ($result as $row) {
-                foreach ($orders as $key=>&$order) {
+                foreach ($orders as $key=>$order) {
                     if ((string)$key === (string)$row['increment_id']) {
-                        $orders[$row['entity_id']] = $order;
-                        unset($orders[$key]);
+                        $existsOrders[$row['entity_id']] = $order;
                     }
                 }
             }
         }
-        return $orders;
+        return $existsOrders;
 
     }
 

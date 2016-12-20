@@ -14,13 +14,14 @@ use \RetailOps\Api\Controller\RetailOps;
 class Acknowledge  extends RetailOps
 {
     const SERVICENAME = 'order_acknowledge';
+    const ENABLE = 'retailops/RetailOps_feed/order_acknowledge';
     /**
      * @var string
      */
     protected $areaName = self::BEFOREPULL.self::SERVICENAME;
 
     /**
-     * @var RetailOps\Api\Model\Acknowledge
+     * @var \RetailOps\Api\Model\Acknowledge
      */
     protected $orderFactory;
 
@@ -43,6 +44,10 @@ class Acknowledge  extends RetailOps
     public function execute()
     {
         try{
+            $scopeConfig = $this->_objectManager->get('\Magento\Framework\App\Config\ScopeConfigInterface');
+            if(!$scopeConfig->getValue(self::ENABLE)) {
+                throw new \LogicException('This feed disable');
+            }
             $postData = $this->getRequest()->getPost();
             $orderFactrory = $this->orderFactory->create();
             $response = $orderFactrory->setOrderRefs($postData);
@@ -52,6 +57,7 @@ class Acknowledge  extends RetailOps
             $this->response = (object)null;
             $this->status = 500;
             $this->error = $e;
+            parent::execute();
         }finally{
             $this->getResponse()->representJson(json_encode($this->response));
             $this->getResponse()->setStatusCode($this->status);

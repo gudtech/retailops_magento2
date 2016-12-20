@@ -49,8 +49,9 @@ interface RetailOpsRicsLinkByUpcInterface
     public function getUpdatedAt();
 
     /**
+     * @param bool
      * @return string|null
      */
-    public function setRoUpc($upc);
+    public function setRoUpc(bool $flag);
 
 }

@@ -74,8 +74,7 @@ class Router implements \Magento\Framework\App\RouterInterface
         if (isset(self::$map[$path[1]])) {
             $controller = self::$map[$path[1]];
             $content = file_get_contents('php://input');
-            $paremeters = new \Zend\Stdlib\Parameters();
-            $paremeters->fromArray(json_decode($content, true));
+            $paremeters = new \Zend\Stdlib\Parameters(json_decode($content, true));
             //fix error with empty content
             $request->setPost($paremeters);
             return $this->actionFactory->create(

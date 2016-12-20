@@ -14,7 +14,10 @@ use \RetailOps\Api\Controller\RetailOps;
 class Pull  extends RetailOps
 {
     const SERVICENAME = 'order';
-    const COUNT_ORDERS_PER_REQUEST = 50;
+    const MAX_COUNT_ORDERS_PER_REQUEST = 50;
+    const MIN_COUNT_ORDERS_PER_REQUEST = 1;
+    const ENABLE = 'retailops/RetailOps_feed/order_pull';
+    const COUNT_ORDERS_PER_REQUEST = 'retailops/RetailOps/order_count';
     /**
      * @var string
      */
@@ -42,16 +45,28 @@ class Pull  extends RetailOps
     public function execute()
     {
         try{
+            $scopeConfig = $this->_objectManager->get('\Magento\Framework\App\Config\ScopeConfigInterface');
+            if(!$scopeConfig->getValue(self::ENABLE)) {
+                throw new \LogicException('This feed disable');
+            }
             $orderFactory = $this->orderFactory->create();
             $pageToken = $this->getRequest()->getParam('page_token');
             $postData = $this->getRequest()->getPost();
-            $response = $orderFactory->getOrders($pageToken, self::COUNT_ORDERS_PER_REQUEST, $postData);
+            $countOfOrders = $scopeConfig->getValue(self::COUNT_ORDERS_PER_REQUEST);
+            if($countOfOrders > 50) {
+                $countOfOrders = 50;
+            }
+            if($countOfOrders < 1) {
+                $countOfOrders = 1;
+            }
+            $response = $orderFactory->getOrders($pageToken, $countOfOrders, $postData);
             $this->response = $response;
         }catch(\Exception $e){
             $this->logger->addCritical($e->getMessage());
             $this->response = [];
             $this->status = 500;
             $this->error = $e;
+            parent::execute();
         }finally{
             $this->getResponse()->representJson(json_encode($this->response));
             $this->getResponse()->setStatusCode($this->status);

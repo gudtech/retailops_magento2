@@ -5,6 +5,7 @@
     <type name="RetailOps\Api\Model\Api\Order\Complete">
         <arguments>
             <argument shared="false" name="shipment" xsi:type="object">\RetailOps\Api\Service\Shipment\Complete</argument>
+            <argument  name="creditMemoHelper" xsi:type="object">RetailOps\Api\Service\CreditMemo\CreditMemoHelper</argument>
         </arguments>
     </type>
     <type name="RetailOps\Api\Model\Shipment\ShipmentSubmit">
@@ -12,9 +13,17 @@
             <argument shared="false" name="shipment" xsi:type="object">\RetailOps\Api\Service\Shipment\ShipmentSubmit</argument>
         </arguments>
     </type>
+    <type name="\RetailOps\Api\Service\CalculateOrderDiscount">
+        <arguments>
+            <argument name="rewardPoints" xsi:type="object">RetailOps\Api\Service\Order\Map\RewardPoints</argument>
+        </arguments>
+    </type>
     <type name="RetailOps\Api\Model\Api\Map\Order">
         <arguments>
             <argument  name="upcFinder" xsi:type="object">RetailOps\Api\Model\Api\Map\UpcFinder</argument>
+            <argument  name="calculateDiscount" xsi:type="object">RetailOps\Api\Service\CalculateOrderDiscount</argument>
+            <argument  name="calculateAmount" xsi:type="object">RetailOps\Api\Service\Order\Map\CalculateAmout</argument>
+            <argument  name="calculateItemPrice" xsi:type="object">RetailOps\Api\Service\CalculateItemPrice</argument>
         </arguments>
     </type>
     <type name="RetailOps\Api\Model\Api\Map\UpcFinder">
@@ -22,4 +31,47 @@
             <argument  name="linkByUpcRepository" xsi:type="object">RetailOps\Api\Model\RoRicsLinkUpcRepository</argument>
         </arguments>
     </type>
+
+    <type name="RetailOps\Api\Model\Api\Order\Cancel">
+        <arguments>
+            <argument  name="creditMemoHelper" xsi:type="object">RetailOps\Api\Service\CreditMemo\CreditMemoHelper</argument>
+        </arguments>
+    </type>
+
+    <type name="\RetailOps\Api\Controller\RetailOps">
+        <plugin name="authorize" type="\RetailOps\Api\Plugin\Authorized" />
+    </type>
+    <type name="\RetailOps\Api\Logger\Base">
+        <arguments>
+            <argument name="filesystem" xsi:type="object">Magento\Framework\Filesystem\Driver\File</argument>
+        </arguments>
+    </type>
+    <type name="\RetailOps\Api\Logger\Logger">
+        <arguments>
+            <argument name="name" xsi:type="string">retailLogger</argument>
+            <argument name="handlers"  xsi:type="array">
+                <item name="system" xsi:type="object">\RetailOps\Api\Logger\Base</item>
+            </argument>
+        </arguments>
+    </type>
+    <type name="Magento\Framework\App\RouterList">
+        <arguments>
+            <argument name="routerList" xsi:type="array">
+                <item name="retailops" xsi:type="array">
+                    <item name="class" xsi:type="string">\RetailOps\Api\CustomRouter\Router</item>
+                    <item name="disable" xsi:type="boolean">false</item>
+                    <item name="sortOrder" xsi:type="string">22</item>
+                </item>
+            </argument>
+        </arguments>
+    </type>
+    <virtualType name="Magento\Sales\Model\ResourceModel\Order\Grid" type="Magento\Sales\Model\ResourceModel\Grid">
+        <arguments>
+            <argument name="columns" xsi:type="array">
+                <item name="retailops_send_status" xsi:type="string">sales_order.retailops_send_status</item>
+                <item name="retailops_order_id" xsi:type="string">sales_order.retailops_order_id</item>
+            </argument>
+        </arguments>
+    </virtualType>
+
 </config>

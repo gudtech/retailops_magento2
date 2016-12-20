@@ -54,25 +54,36 @@ class ShipmentSubmit extends \RetailOps\Api\Service\Shipment
         }
         $this->setUnShippedItems($postData);
         //synchonize api with Shipment abstract class
-        if(isset($postData['shipment'])) {
-            $postData['shipments'] = $postData['shipment'];
-        }
+//        if(isset($postData['shipment'])) {
+//            $postData['shipments'] = $postData['shipment'];
+//        }
         $this->setTrackingAndShipmentItems($postData);
 
         /**
          * check, issset this items in order
          */
-        $this->issetItems($this->getShippmentItems()['items'], $order);
-        /**
-         * check, if in order we have enough products for shipment
-         */
-        $this->haveQuantityToShip($this->getShippmentItems()['items'], $order);
+        $shipmentItems = $this->getShippmentItems();
+        try {
 
-        if($this->orderCheck->getForcedShipmentWithInvoice($order)) {
-            $this->invoiceHelper->createInvoice($this->getShippmentItems(), $order);
+            if (is_array($shipmentItems) && array_key_exists('items', $shipmentItems)) {
+                $this->issetItems($shipmentItems['items'], $order);
+            }
+            /**
+             * check, if in order we have enough products for shipment
+             */
+            $this->haveQuantityToShip($shipmentItems['items'], $order);
+
+            if ($this->orderCheck->getForcedShipmentWithInvoice($order)) {
+                $this->invoiceHelper->createInvoice($order, $this->getShippmentItems());
+            }
+        }catch (\Exception $e) {
+
+            if ($this->orderCheck->getForcedShipmentWithInvoice($order)) {
+                $this->invoiceHelper->createInvoice($this->getShippmentItems(), $order);
+            }
+
+            $this->createShipment($this->getOrder());
         }
-
-        $this->createShipment($this->getOrder());
     }
 
     protected function issetItems($items, \Magento\Sales\Api\Data\OrderInterface $order)
@@ -107,19 +118,21 @@ class ShipmentSubmit extends \RetailOps\Api\Service\Shipment
                 if ($carrierName === null) {
                     continue;
                 }
-                //try to find retailops carrier in magento carriers, else use custom label
-                if (isset($magentoTracking[$carrierName])) {
-                    $tracking[] = [
-                        'carrier_code' => $carrierName,
-                        'title' => $magentoTracking[$carrierName]->getConfigData('title'),
-                        'number' => isset($package['tracking_number']) ? $package['tracking_number'] : null
-                    ];
-                } else {
-                    $tracking[] = [
-                        'carrier_code' => 'custom',
-                        'title' => $package['carrier_class_name'] ?? 'RetailOps',
-                        'number' => isset($package['tracking_number']) ? $package['tracking_number'] : null
-                    ];
+                if(isset($package['tracking_number']) && !empty($package['tracking_number'])) {
+                    //try to find retailops carrier in magento carriers, else use custom label
+                    if (isset($magentoTracking[$carrierName])) {
+                        $tracking[] = [
+                            'carrier_code' => $carrierName,
+                            'title' => $magentoTracking[$carrierName]->getConfigData('title'),
+                            'number' => isset($package['tracking_number']) ? $package['tracking_number'] : null
+                        ];
+                    } else {
+                        $tracking[] = [
+                            'carrier_code' => 'custom',
+                            'title' => $package['carrier_class_name'] ?? 'RetailOps',
+                            'number' => isset($package['tracking_number']) ? $package['tracking_number'] : null
+                        ];
+                    }
                 }
                 $this->setShipmentsItems($package['package_items']);
                 $this->tracking = $tracking;

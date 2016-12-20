@@ -71,7 +71,67 @@ class UpgradeSchema implements UpgradeSchemaInterface
         if(version_compare($context->getVersion(), '1.0.0')< 0) {
             $this->addUpcFinderTable($setup);
         }
+        if(version_compare($context->getVersion(), '1.0.1')<0) {
+            $this->addColumnsToInventoryHistory($setup);
+        }
+
+        if(version_compare($context->getVersion(), '1.0.2')<0) {
+            $this->addQueueTable($setup);
+        }
         $setup->endSetup();
+    }
+
+    protected function addQueueTable($installer)
+    {
+        if ($installer->getConnection()->isTableExists($installer->getTable('retailops_api_queue'))) {
+            return;
+        }
+            $table = $installer->getConnection()->newTable(
+                $installer->getTable('retailops_api_queue')
+            )->addColumn(
+                'retailops_api_queue_id',
+                \Magento\Framework\DB\Ddl\Table::TYPE_INTEGER,
+                null,
+                [ 'identity' => true, 'nullable' => false, 'primary' => true, 'unsigned' => true, ],
+                'Entity ID'
+            )->addColumn(
+                'message',
+                \Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
+                '64k',
+                [ 'nullable' => true, ],
+                'Message'
+            )->addColumn(
+                'creation_time',
+                \Magento\Framework\DB\Ddl\Table::TYPE_TIMESTAMP,
+                null,
+                [ 'nullable' => false, 'default' => \Magento\Framework\DB\Ddl\Table::TIMESTAMP_INIT, ],
+                'Creation Time'
+            )->addColumn(
+                'update_time',
+                \Magento\Framework\DB\Ddl\Table::TYPE_TIMESTAMP,
+                null,
+                [ 'nullable' => false, 'default' => \Magento\Framework\DB\Ddl\Table::TIMESTAMP_INIT_UPDATE, ],
+                'Modification Time'
+            )->addColumn(
+                'is_active',
+                \Magento\Framework\DB\Ddl\Table::TYPE_SMALLINT,
+                null,
+                [ 'nullable' => false, 'default' => '1', ],
+                'Is Active'
+            )->addColumn(
+                'queue_type',
+                \Magento\Framework\DB\Ddl\Table::TYPE_INTEGER,
+                null,
+                [ 'nullable' => false, 'default' => 1, ],
+                'Type of queue(cancel and e.t.c.)'
+            )->addColumn(
+                'order_increment_id',
+                \Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
+                255,
+                [],
+                'Order increment id'
+            );
+        $installer->getConnection()->createTable($table);
     }
 
     protected function addUpcFinderTable($installer)
@@ -118,7 +178,7 @@ class UpgradeSchema implements UpgradeSchemaInterface
                             'Created At'
                          )
                        ->addColumn(
-                           'updated_at',
+                           'update_at',
                            \Magento\Framework\DB\Ddl\Table::TYPE_TIMESTAMP,
                            null,
                            ['default' => \Magento\Framework\DB\Ddl\Table::TIMESTAMP_INIT_UPDATE, 'nullable' => false],
@@ -279,5 +339,33 @@ class UpgradeSchema implements UpgradeSchemaInterface
             )
             ->setComment('Retail ops order status history');
         $installer->getConnection()->createTable($table);
+    }
+
+    protected function addColumnsToInventoryHistory($installer)
+    {
+        $tableName = $installer->getTable('retailops_inventory_history');
+        if ($installer->getConnection()->isTableExists($tableName)) {
+            $columns = [
+                'real_count' => [
+                    'type' => Table::TYPE_TEXT,
+                    'length' => 255,
+                    'default' => 0,
+                    'nullable' => false,
+                    'comment' => 'Real count from RO'
+                ],
+
+                'reserve_count' => [
+                    'type' => Table::TYPE_TEXT,
+                    'length' => 255,
+                    'default' => 0,
+                    'nullable' => false,
+                    'comment' => 'Rererve by script'
+                ]
+            ];
+            $connection = $installer->getConnection();
+            foreach ($columns as $name => $definition) {
+                $connection->addColumn($tableName, $name, $definition);
+            }
+        }
     }
 }

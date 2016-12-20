@@ -22,6 +22,20 @@ interface InventoryHistoryInterface
     const INVENTORY_ADD = 'inventory_add';
     const OPERATOR = 'operator';
     const DATE_CRETE = 'date_create';
+    const REAL_COUNT = 'real_count';
+    const RESERVE_COUNT = 'reserve_count';
+
+    /**
+     * @param $realCount
+     * @return mixed
+     */
+    public function setRealCount($realCount);
+
+    public function getRealCount();
+
+    public function setReserveCount($reserveCount);
+
+    public function getReserveCount();
     /**
      * @return int|string|null
      */

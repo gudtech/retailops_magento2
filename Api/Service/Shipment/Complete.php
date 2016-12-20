@@ -42,7 +42,8 @@ class Complete extends \RetailOps\Api\Service\Shipment
         }
         $order = $this->getOrder();
         if(!$this->orderCheck->canOrderShip($this->getOrder())) {
-            throw new \LogicException(__(sprintf('This order can\'t be ship, order number: %s', $this->getOrder()->getId())));
+            return;
+//            throw new \LogicException(__(sprintf('This order can\'t be ship, order number: %s', $this->getOrder()->getId())));
         }
         $this->setUnShippedItems($postData);
         //synchonize api with Shipment abstract class
@@ -50,7 +51,6 @@ class Complete extends \RetailOps\Api\Service\Shipment
             $postData['shipments'] = $postData['shipment'];
         }
         $this->setTrackingAndShipmentItems($postData);
-
         /**
          * check, issset this items in order
          */
@@ -59,7 +59,6 @@ class Complete extends \RetailOps\Api\Service\Shipment
          * check, if in order we have enough products for shipment
          */
         $this->haveQuantityToShip($this->getShippmentItems()['items'], $order);
-
 
         $this->createShipment($this->getOrder());
 

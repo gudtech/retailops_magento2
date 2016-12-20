@@ -8,7 +8,7 @@
             <tab>service</tab>
             <resource>RetailOps_Api::api</resource>
             <group id="RetailOps" type="text" translate="label" sortOrder="1" showInDefault="1"
-                   showInWebsite="1" showInStore="1">
+                   showInWebsite="0" showInStore="0">
                 <label>General</label>
                 <field id="turn_on" type="select" showInDefault="1" showInStore="1" sortOrder="10" translate="label" showInWebsite="1">
                     <label>Enabled</label>
@@ -22,12 +22,74 @@
                     <source_model>\RetailOps\Api\Config\InventoryType</source_model>
                     <can_be_empty>0</can_be_empty>
                 </field>
-                <field id="enable_log" type="select" showInDefault="1" showInStore="1" sortOrder="10" translate="label" showInWebsite="1">
+                <field id="enable_log" type="select" showInDefault="1" showInStore="0" sortOrder="20" translate="label" showInWebsite="0">
                     <label>Enabled</label>
                     <source_model>Magento\Config\Model\Config\Source\Enabledisable</source_model>
                     <comment><![CDATA[Default it try, but all response was send to db. After debug or for increase perfomance disable this]]></comment>
                 </field>
+                <field id="order_count" type="text" showInDefault="1" showInStore="0" sortOrder="20" translate="label" showInWebsite="0">
+                    <label>Countity orders per response</label>
+                    <comment><![CDATA[Max per response is 50, min is 1]]></comment>
+                </field>
                 </group>
+            <group id="RetailOps_feed" type="text" translate="label" sortOrder="2" showInDefault="1"
+                   showInWebsite="0" showInStore="0">
+                <label>Feeds</label>
+                <field id = "order_pull" type="select" showInDefault="1" showInStore="0" sortOrder="30" translate="label" showInWebsite="0">
+                    <label>
+                        Enable order pull feed
+                    </label>
+                    <source_model>Magento\Config\Model\Config\Source\Enabledisable</source_model>
+                </field>
+                <field id = "order_shipment_submit" type="select" showInDefault="1" showInStore="0" sortOrder="30" translate="label" showInWebsite="0">
+                    <label>
+                        Enable order shipment submit feed
+                    </label>
+                    <source_model>Magento\Config\Model\Config\Source\Enabledisable</source_model>
+                </field>
+                <field id = "order_acknowledge" type="select" showInDefault="1" showInStore="0" sortOrder="30" translate="label" showInWebsite="0">
+                    <label>
+                        Enable order acknowledge feed
+                    </label>
+                    <source_model>Magento\Config\Model\Config\Source\Enabledisable</source_model>
+                </field>
+                <field id = "inventory_push" type="select" showInDefault="1" showInStore="0" sortOrder="30" translate="label" showInWebsite="0">
+                    <label>
+                        Enable inventory push feed
+                    </label>
+                    <source_model>Magento\Config\Model\Config\Source\Enabledisable</source_model>
+                </field>
+                <field id = "order_cancel" type="select" showInDefault="1" showInStore="0" sortOrder="30" translate="label" showInWebsite="0">
+                    <label>
+                        Enable order cancel feed
+                    </label>
+                    <source_model>Magento\Config\Model\Config\Source\Enabledisable</source_model>
+                </field>
+                <field id = "order_complete" type="select" showInDefault="1" showInStore="0" sortOrder="30" translate="label" showInWebsite="0">
+                    <label>
+                        Enable order complete feed
+                    </label>
+                    <source_model>Magento\Config\Model\Config\Source\Enabledisable</source_model>
+                </field>
+                <field id = "order_update" type="select" showInDefault="1" showInStore="0" sortOrder="30" translate="label" showInWebsite="0">
+                    <label>
+                        Enable order update
+                    </label>
+                    <source_model>Magento\Config\Model\Config\Source\Enabledisable</source_model>
+                </field>
+            </group>
+            <group id="RetailOps_advanced" type="text" translate="label" sortOrder="2" showInDefault="1"
+                   showInWebsite="0" showInStore="0">
+                <label>Cancel queue</label>
+                <field id = "cancel_queue" type="select" showInDefault="1" showInStore="0" sortOrder="30" translate="label" showInWebsite="0">
+                    <label>
+                        Use feed cancel
+                    </label>
+                    <source_model>Magento\Config\Model\Config\Source\Enabledisable</source_model>
+                    <comment><![CDATA[if you disable this option, cancel feed will be work as prepared (cancel, refund ) with order]]></comment>
+
+                </field>
+            </group>
         </section>
     </system>
 </config>

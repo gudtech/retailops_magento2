@@ -37,4 +37,10 @@ interface RetailOpsRicsLinkByUpcRepositoryInterface
      * @return \RetailOps\Api\Api\Data\RetailOpsRicsLinkByUpcInterface
      */
     public function getAllUpcs($upc);
+
+    /**
+     * @param string $upc
+     * @return void
+     */
+    public function setRoUpc($upc);
 }
