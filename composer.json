@@ -1,0 +1,16 @@
+{
+    "name": "gudtech/retailops_magento2",
+    "description": "The RetailOps Magento2 extension is an implementation of the protocol specified by the RetailOps Channel SDK.",
+    "type": "Magento2 module",
+    "license": "GPLv3",
+    "minimum-stability": "stable",
+    "require": {},
+    "autoload": {
+        "files": [
+            "Api/registration.php"
+        ],
+        "psr-4": {
+            "RetailOps\\Api\\": "Api"
+        }
+    }
+}
